@@ -437,14 +437,6 @@ ResizeablePage {
                             }
                         }
 
-                        SectionHeading { text: KI18n.i18nc("@title", "Aspect Ratio") }
-                        PresetRow {
-                            options: root.aspectPresets
-                            current: root.aspectOverride
-                            tolerance: 0.02
-                            onChosen: function(value) { root.setAspect(value) }
-                        }
-
                         SectionHeading { text: KI18n.i18nc("@title", "Crop") }
                         Label {
                             Layout.fillWidth: true
@@ -461,6 +453,14 @@ ResizeablePage {
                         Button {
                             action: HarunaApp.actions.cropToContentAction
                             text: KI18n.i18nc("@action:button", "Custom…")
+                        }
+
+                        SectionHeading { text: KI18n.i18nc("@title", "Aspect Ratio") }
+                        PresetRow {
+                            options: root.aspectPresets
+                            current: root.aspectOverride
+                            tolerance: 0.02
+                            onChosen: function(value) { root.setAspect(value) }
                         }
 
                         SectionHeading { text: KI18n.i18nc("@title", "Rotation") }
@@ -530,7 +530,7 @@ ResizeablePage {
                         ValueSlider { label: KI18n.i18nc("@label:slider", "Hue"); value: root.hue
                             onMoved: function(v) { root.setAdjustment("hue", v); root.hue = Math.round(v) } }
 
-                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing }
+                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing * 4 }
                     }
                 }
 
@@ -651,7 +651,7 @@ ResizeablePage {
                             }
                         }
 
-                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing }
+                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing * 4 }
                     }
                 }
 
@@ -786,7 +786,7 @@ ResizeablePage {
                             }
                         }
 
-                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing }
+                        Item { Layout.preferredHeight: Kirigami.Units.largeSpacing * 4 }
                     }
                 }
             }
