@@ -390,16 +390,6 @@ SettingsBasePage {
             }
         }
 
-        Item { Layout.preferredWidth: 1 }
-
-        CheckBox {
-            text: KI18n.i18nc("@option:check", "Show chapter markers")
-            checked: GeneralSettings.showChapterMarkers
-            onClicked: {
-                GeneralSettings.showChapterMarkers = checked
-                GeneralSettings.save()
-            }
-        }
 
         Item { Layout.preferredWidth: 1 }
 

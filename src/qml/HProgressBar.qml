@@ -26,8 +26,8 @@ RowLayout {
 
     property alias loopIndicator: loopIndicator
     property alias chaptersPopupIsOpen: chaptersPopup.visible
-    property bool showChapterMarkers: GeneralSettings.showChapterMarkers
-                                      && m_mpv.chaptersModel.rowCount * 20 < width
+    // Float Frame: the bar stays clean; chapters live behind the footer's chapters button
+    readonly property bool showChapterMarkers: false
 
     function openChapterPopup(triggerItem: Item) {
         const x = (chaptersPopup.width + triggerItem.width) * -0.5
@@ -189,7 +189,7 @@ RowLayout {
 
                 onClicked: function(mouse) {
                     if (mouse.button === Qt.MiddleButton) {
-                        if (!GeneralSettings.showChapterMarkers) {
+                        if (root.m_mpv.chaptersModel.rowCount === 0) {
                             return
                         }
 
@@ -197,10 +197,6 @@ RowLayout {
                         const chapters = root.m_mpv.getProperty(MpvProperties.ChapterList)
                         const nextChapter = chapters.findIndex(chapter => chapter.time > time)
                         root.m_mpv.chapter = nextChapter
-                    }
-                    if (mouse.button === Qt.RightButton && root.m_mpv.chaptersModel.rowCount > 0) {
-                        chaptersPopup.x = mouseX - chaptersPopup.width * 0.5
-                        chaptersPopup.open()
                     }
                 }
 
