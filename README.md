@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="data/icons/sc-apps-io.github.python2121.FloatFrame.svg" width="128" alt="Float Frame icon">
+</p>
+
 # Float Frame
 
 A fork of [Haruna](https://invent.kde.org/multimedia/haruna) (KDE's mpv-based
