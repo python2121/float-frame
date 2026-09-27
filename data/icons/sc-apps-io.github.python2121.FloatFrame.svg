@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <!-- flat play button: Breeze blue, no gradient, gloss or shadow -->
   <rect x="4" y="4" width="56" height="56" rx="14" fill="#3daee9"/>
-  <path d="M25 18v28l22-14z" fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M23 15v34l28-17z" fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
 </svg>
