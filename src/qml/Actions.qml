@@ -362,6 +362,15 @@ Item {
             }
         }
 
+        function onCropToContentAction() {
+            root.m_mpv.startCropSelection()
+        }
+
+        function onResetCropAction() {
+            root.m_mpv.resetCrop()
+            root.m_osd.message(KI18n.i18nc("@info:tooltip", "Crop reset"))
+        }
+
         function onTogglePlaylistAction() {
             root.togglePlaylist()
         }

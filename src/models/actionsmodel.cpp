@@ -645,6 +645,22 @@ ActionsModel::ActionsModel(QObject *parent)
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = i18nc("@info", "Hide the window frame, menu bar, toolbar and docked footer. Drag the video to move the window, drag its edges to resize.");
     m_actions << action;
+
+    action.name = u"cropToContentAction"_s;
+    action.text = i18nc("@action", "Crop to Content…");
+    action.iconName = u"transform-crop"_s;
+    action.defaultShortcut = Qt::Key_C;
+    action.shortcut = getShortcut(action.name, action.defaultShortcut);
+    action.description = i18nc("@info", "Pause and drag a rectangle over the part of the picture to keep; the rest is cropped away and the window follows.");
+    m_actions << action;
+
+    action.name = u"resetCropAction"_s;
+    action.text = i18nc("@action", "Reset Crop");
+    action.iconName = u"edit-undo"_s;
+    action.defaultShortcut = Qt::SHIFT | Qt::Key_C;
+    action.shortcut = getShortcut(action.name, action.defaultShortcut);
+    action.description = QString{};
+    m_actions << action;
 }
 
 int ActionsModel::rowCount(const QModelIndex &parent) const

@@ -62,6 +62,24 @@ Loader {
             root.active = false
         }
 
+        MenuItem {
+            action: HarunaApp.actions.toggleChromelessAction
+            text: {
+                const mainWindow = Window.window as Main
+                return mainWindow?.chromeless
+                        ? KI18n.i18nc("@action:inmenu", "Add Chrome")
+                        : KI18n.i18nc("@action:inmenu", "Remove Chrome")
+            }
+        }
+        MenuItem { action: HarunaApp.actions.cropToContentAction }
+        MenuItem {
+            action: HarunaApp.actions.resetCropAction
+            visible: root.m_mpv.hasCrop()
+            height: visible ? implicitHeight : 0
+        }
+
+        MenuSeparator {}
+
         MenuItem { action: HarunaApp.actions.playPauseAction }
         MenuItem { action: HarunaApp.actions.playNextAction }
         MenuItem { action: HarunaApp.actions.playPreviousAction }

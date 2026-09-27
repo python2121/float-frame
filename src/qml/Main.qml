@@ -31,6 +31,7 @@ ApplicationWindow {
     // the video is dragged to move the window and its edges to resize it.
     // Either the saved setting or the --chromeless session override turns it on.
     readonly property bool chromeless: GeneralSettings.chromeless || HarunaApp.chromelessOverride
+    onChromelessChanged: fitWindowTimer.restart()
 
     property int previousVisibility: Window.Windowed
     property var acceptedSubtitleTypes: ["application/x-subrip", "text/x-ssa", "text/x-microdvd"]
@@ -249,6 +250,21 @@ ApplicationWindow {
 
         onVideoReconfig: {
             window.resizeWindow()
+            fitWindowTimer.restart()
+        }
+
+        onCropChanged: {
+            if (mpv.hasCrop()) {
+                osd.message(KI18n.i18nc("@info:tooltip", "Cropped to %1 × %2", mpv.cropRect.width, mpv.cropRect.height))
+            }
+            fitWindowTimer.restart()
+        }
+
+        // osd-dimensions settles a moment after a reconfig
+        Timer {
+            id: fitWindowTimer
+            interval: 150
+            onTriggered: window.fitWindowToPicture()
         }
 
         onEofPlayNext: {
@@ -539,6 +555,31 @@ ApplicationWindow {
         mpv.stop()
         Models.recentFilesModel.addRecentFile(path, openedFrom)
         playlist.manager.defaultPlaylist.addItem(path, PlaylistModel.Clear)
+    }
+
+    // Chromeless: the window *is* the picture. Keep the width, set the height
+    // to the displayed picture's aspect so no black bars remain (crop included).
+    function fitWindowToPicture() : void {
+        if (!chromeless || window.visibility !== Window.Windowed || !mpv.isVideo) {
+            return
+        }
+        const osd = mpv.getProperty("osd-dimensions")
+        if (!osd || !osd.w || !osd.h) {
+            return
+        }
+        const pictureWidth = osd.w - osd.ml - osd.mr
+        const pictureHeight = osd.h - osd.mt - osd.mb
+        if (pictureWidth <= 0 || pictureHeight <= 0) {
+            return
+        }
+        const aspect = pictureWidth / pictureHeight
+        let newHeight = Math.round(window.width / aspect)
+        const maxHeight = Screen.desktopAvailableHeight
+        if (newHeight > maxHeight) {
+            newHeight = maxHeight
+            window.width = Math.round(newHeight * aspect)
+        }
+        window.height = Math.max(window.minimumHeight, newHeight)
     }
 
     function chromelessHintText() : string {

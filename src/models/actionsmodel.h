@@ -130,6 +130,8 @@ Q_SIGNALS:
     void toggleDeinterlacingAction();
     void toggleFullscreenAction();
     void toggleChromelessAction();
+    void cropToContentAction();
+    void resetCropAction();
     void toggleMenuBarAction();
     void toggleHeaderAction();
     void togglePlaylistAction();

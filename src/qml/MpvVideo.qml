@@ -29,6 +29,74 @@ MpvItem {
     property alias mouseY: mouseArea.mouseY
     property bool isRemoteUrl: typeof currentUrl.toString() === "string" && currentUrl.toString().startsWith("http")
 
+    // Float Frame: crop to content (mpv video-crop, source pixels; empty = no crop)
+    property rect cropRect: Qt.rect(0, 0, 0, 0)
+    property alias cropOverlay: cropOverlay
+    property bool pendingCropSelection: false
+
+    signal cropChanged()
+
+    function hasCrop() : bool {
+        return cropRect.width > 0 && cropRect.height > 0
+    }
+
+    function applyCrop(sourceRect: rect) : void {
+        const params = getProperty("video-params")
+        if (params && params.w && sourceRect.width >= params.w && sourceRect.height >= params.h) {
+            resetCrop()
+            return
+        }
+        setProperty("video-crop", `${sourceRect.width}x${sourceRect.height}+${sourceRect.x}+${sourceRect.y}`)
+        cropRect = sourceRect
+        cropChanged()
+    }
+
+    function resetCrop() : void {
+        setProperty("video-crop", "")
+        cropRect = Qt.rect(0, 0, 0, 0)
+        cropChanged()
+    }
+
+    // Pause and let the user select. An existing crop is lifted first so the
+    // selection is made on the whole picture; the overlay opens once mpv has
+    // reconfigured (or after a short fallback delay).
+    function startCropSelection() : void {
+        if (cropOverlay.active) {
+            cropOverlay.cancel()
+            return
+        }
+        if (!isVideo || playbackState === MpvItem.PlaybackState.Stopped) {
+            return
+        }
+        pause = true
+        if (hasCrop()) {
+            pendingCropSelection = true
+            resetCrop()
+            cropSelectionFallback.restart()
+        } else {
+            cropOverlay.open()
+        }
+    }
+
+    Timer {
+        id: cropSelectionFallback
+        interval: 300
+        onTriggered: {
+            if (root.pendingCropSelection) {
+                root.pendingCropSelection = false
+                root.cropOverlay.open()
+            }
+        }
+    }
+
+    onVideoReconfig: {
+        if (pendingCropSelection) {
+            pendingCropSelection = false
+            cropSelectionFallback.stop()
+            Qt.callLater(() => cropOverlay.open())
+        }
+    }
+
     signal mousePositionChanged(double x, double y)
     signal openPlaylist()
     signal closePlaylist()
@@ -440,5 +508,18 @@ MpvItem {
                 Kirigami.Theme.colorSet: Kirigami.Theme.Window
             }
         }
+    }
+
+    CropOverlay {
+        id: cropOverlay
+
+        m_mpv: root
+        z: 10
+
+        onApplied: function(sourceRect) {
+            root.applyCrop(sourceRect)
+            root.focus = true
+        }
+        onCancelled: root.focus = true
     }
 }
