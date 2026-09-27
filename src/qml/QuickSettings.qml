@@ -411,12 +411,13 @@ ResizeablePage {
 
                 // ================= VIDEO =================
                 ScrollView {
+                    id: videoScroll
                     contentWidth: availableWidth
                     leftPadding: Kirigami.Units.largeSpacing * 2
                     rightPadding: Kirigami.Units.largeSpacing * 2
                     bottomPadding: Kirigami.Units.largeSpacing
                     ColumnLayout {
-                        width: parent.width
+                        width: videoScroll.availableWidth   // inside the padding, not the full view
                         spacing: Kirigami.Units.smallSpacing
 
                         SectionHeading { text: KI18n.i18nc("@title", "Video Track") }
@@ -536,12 +537,13 @@ ResizeablePage {
 
                 // ================= AUDIO =================
                 ScrollView {
+                    id: audioScroll
                     contentWidth: availableWidth
                     leftPadding: Kirigami.Units.largeSpacing * 2
                     rightPadding: Kirigami.Units.largeSpacing * 2
                     bottomPadding: Kirigami.Units.largeSpacing
                     ColumnLayout {
-                        width: parent.width
+                        width: audioScroll.availableWidth   // inside the padding, not the full view
                         spacing: Kirigami.Units.smallSpacing
 
                         SectionHeading { text: KI18n.i18nc("@title", "Audio Track") }
@@ -657,12 +659,13 @@ ResizeablePage {
 
                 // ================= SUBTITLES =================
                 ScrollView {
+                    id: subtitlesScroll
                     contentWidth: availableWidth
                     leftPadding: Kirigami.Units.largeSpacing * 2
                     rightPadding: Kirigami.Units.largeSpacing * 2
                     bottomPadding: Kirigami.Units.largeSpacing
                     ColumnLayout {
-                        width: parent.width
+                        width: subtitlesScroll.availableWidth   // inside the padding, not the full view
                         spacing: Kirigami.Units.smallSpacing
 
                         SectionHeading { text: KI18n.i18nc("@title", "Subtitle Track") }
