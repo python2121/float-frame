@@ -33,7 +33,7 @@ Item {
     readonly property bool shouldShow: (targetWindow as Main)?.chromeless === true
                                        && targetWindow.visibility !== Window.FullScreen
 
-    implicitHeight: bar.height + Kirigami.Units.largeSpacing * (isSmallSize ? 1 : 2)
+    implicitHeight: bar.height
     visible: shouldShow
     onShouldShowChanged: {
         if (!shouldShow) {
@@ -81,15 +81,15 @@ Item {
     ToolBar {
         id: bar
 
-        x: (root.width - width) / 2
-        width: Math.min(root.width - Kirigami.Units.largeSpacing * (root.isSmallSize ? 2 : 4), 900)
+        // a title-bar strip: full width, flush with the top edge
+        x: 0
+        width: root.width
         padding: Kirigami.Units.smallSpacing
         position: ToolBar.Header
         hoverEnabled: true
         state: root.barState
         background: Rectangle {
-            color: Qt.alpha(Kirigami.Theme.backgroundColor, 0.8)
-            radius: Kirigami.Units.cornerRadius
+            color: Qt.alpha(Kirigami.Theme.backgroundColor, 0.85)
         }
 
         // title-bar gestures: drag to move, double-click to maximize/restore
@@ -162,7 +162,7 @@ Item {
             State {
                 name: "visible"
                 PropertyChanges {
-                    bar.y: Kirigami.Units.largeSpacing * (root.isSmallSize ? 1 : 2)
+                    bar.y: 0
                     bar.visible: true
                 }
             }
