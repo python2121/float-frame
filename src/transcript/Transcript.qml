@@ -23,7 +23,7 @@ ResizeablePage {
     property TranscriptModel transcriptModel: TranscriptModel {}
     property int selectedTrackId: -1
 
-    edge: PlaylistSettings.position === "right" ? Qt.LeftEdge : Qt.RightEdge
+    edge: Qt.LeftEdge   // Float Frame: Quick Settings owns the right edge
     customWidth: 380
     width: limitWidth(customWidth * fsScale)
 

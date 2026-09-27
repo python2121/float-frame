@@ -305,7 +305,7 @@ ApplicationWindow {
     WindowResizeHandles {
         targetWindow: window
         anchors.fill: parent
-        visible: window.chromeless && window.visibility === Window.Windowed
+        visible: window.chromeless && window.visibility === Window.Windowed && !mpv.cropOverlay.active
     }
 
     // extra space outside the playlist so that the playlist is not closed
@@ -341,12 +341,16 @@ ApplicationWindow {
         }
     }
 
+    // Float Frame: the playlist engine stays (folders, next file, MPRIS) but its
+    // slide-in panel is gone; QuickSettings takes the right edge.
     Playlist {
         id: playlist
 
         property bool isReady: false
 
         m_mpv: mpv
+        state: "hidden"
+        visible: false
         height: mpv.height
         mainWindowWidth: window.width
         fsScale: window.isFullScreen() && PlaylistSettings.bigFontFullscreen ? 1.36 : 1
@@ -356,35 +360,6 @@ ApplicationWindow {
             window.initPlaylist()
         }
 
-        Connections {
-            target: actions
-            function onTogglePlaylist() {
-                if (playlist.state === "visible") {
-                    playlist.state = "hidden"
-                } else {
-                    playlist.state = "visible"
-                }
-            }
-        }
-
-        Connections {
-            target: HarunaApp
-            function onQmlApplicationMouseLeave() {
-                if (PlaylistSettings.canToggleWithMouse && (window.isFullScreen() || window.isMaximized())) {
-                    playlist.state = "hidden"
-                }
-            }
-        }
-
-        Connections {
-            target: mpv
-            function onOpenPlaylist() {
-                playlist.state = "visible"
-            }
-            function onClosePlaylist() {
-                playlist.state = "hidden"
-            }
-        }
     }
 
     Footer {
@@ -397,6 +372,29 @@ ApplicationWindow {
         m_menuBarLoader: menuBarLoader
         m_header: header
         m_settingsLoader: settingsLoader
+    }
+
+    // chromeless: window title and minimize/maximize/close appear on mouse movement
+    FloatingWindowControls {
+        m_mpv: mpv
+        width: window.contentItem.width
+        anchors.top: window.contentItem.top
+    }
+
+    QuickSettings {
+        id: quickSettings
+
+        m_mpv: mpv
+        height: mpv.height
+        mainWindowWidth: window.width
+        fsScale: 1
+
+        Connections {
+            target: actions
+            function onToggleQuickSettings() {
+                quickSettings.toggle()
+            }
+        }
     }
 
     Actions {

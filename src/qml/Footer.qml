@@ -96,10 +96,10 @@ Item {
         }
 
         Component {
-            id: togglePlaylistButton
+            id: toggleQuickSettingsButton
 
             ToolButton {
-                action: HarunaApp.actions.togglePlaylistAction
+                action: HarunaApp.actions.toggleQuickSettingsAction
                 icon.width: root.buttonSize
                 icon.height: root.buttonSize
                 display: root.isSmallSize ? AbstractButton.IconOnly : AbstractButton.TextBesideIcon
@@ -128,12 +128,6 @@ Item {
                     icon.height: root.buttonSize
                 }
 
-                Loader {
-                    sourceComponent: togglePlaylistButton
-                    active: !PlaylistSettings.canToggleWithMouse && PlaylistSettings.position === "left"
-                    visible: active
-                    asynchronous: false
-                }
 
                 ToolButton {
                     id: playPauseButton
@@ -255,8 +249,8 @@ Item {
                 }
 
                 Loader {
-                    sourceComponent: togglePlaylistButton
-                    active: !PlaylistSettings.canToggleWithMouse && PlaylistSettings.position === "right"
+                    sourceComponent: toggleQuickSettingsButton
+                    active: true
                     visible: active
                     asynchronous: false
                 }

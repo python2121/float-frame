@@ -102,12 +102,14 @@ qt_add_qml_module(haruna
     QML_FILES
         qml/Actions.qml
         qml/CropOverlay.qml
+        qml/FloatingWindowControls.qml
         qml/Footer.qml
         qml/Header.qml
         qml/HProgressBar.qml
         qml/MenuBarLoader.qml
         qml/MpvVideo.qml
         qml/Osd.qml
+        qml/QuickSettings.qml
         qml/VolumeSlider.qml
         qml/WindowResizeHandles.qml
         qml/Main.qml

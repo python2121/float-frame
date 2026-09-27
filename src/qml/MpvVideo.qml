@@ -33,6 +33,7 @@ MpvItem {
     property rect cropRect: Qt.rect(0, 0, 0, 0)
     property alias cropOverlay: cropOverlay
     property bool pendingCropSelection: false
+    property bool wasPlayingBeforeCrop: false
 
     signal cropChanged()
 
@@ -65,9 +66,19 @@ MpvItem {
             cropOverlay.cancel()
             return
         }
-        if (!isVideo || playbackState === MpvItem.PlaybackState.Stopped) {
+        if (pendingCropSelection || !isVideo || playbackState === MpvItem.PlaybackState.Stopped) {
             return
         }
+        // video-crop is applied before rotation and flipping, so the on-screen
+        // rectangle would not correspond to the source; refuse rather than mis-crop
+        const rotation = Number(getProperty("video-rotate")) || 0
+        const filters = getProperty("vf")
+        const flipped = Array.isArray(filters) && filters.some(f => f.name === "vflip" || f.name === "hflip")
+        if (rotation !== 0 || flipped) {
+            osdMessage(KI18n.i18nc("@info:tooltip", "Crop is not available while the video is rotated or flipped"))
+            return
+        }
+        wasPlayingBeforeCrop = !pause
         pause = true
         if (hasCrop()) {
             pendingCropSelection = true
@@ -94,6 +105,20 @@ MpvItem {
             pendingCropSelection = false
             cropSelectionFallback.stop()
             Qt.callLater(() => cropOverlay.open())
+        }
+    }
+
+    // video-crop is an mpv option and would carry over to the next file
+    onCurrentUrlChanged: {
+        if (hasCrop()) {
+            resetCrop()
+        }
+    }
+
+    function finishCropSelection() : void {
+        focus = true
+        if (wasPlayingBeforeCrop) {
+            pause = false
         }
     }
 
@@ -165,22 +190,6 @@ MpvItem {
                 }
             }
 
-            if (!PlaylistSettings.canToggleWithMouse) {
-                return
-            }
-            if (PlaylistSettings.position === "right") {
-                if (mouseX > width - 50) {
-                    root.openPlaylist()
-                } else {
-                    root.closePlaylist()
-                }
-            } else {
-                if (mouseX < 50) {
-                    root.openPlaylist()
-                } else {
-                    root.closePlaylist()
-                }
-            }
         }
 
         onWheel: function(wheel) {
@@ -518,8 +527,8 @@ MpvItem {
 
         onApplied: function(sourceRect) {
             root.applyCrop(sourceRect)
-            root.focus = true
+            root.finishCropSelection()
         }
-        onCancelled: root.focus = true
+        onCancelled: root.finishCropSelection()
     }
 }

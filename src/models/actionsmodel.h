@@ -131,6 +131,7 @@ Q_SIGNALS:
     void toggleFullscreenAction();
     void toggleChromelessAction();
     void cropToContentAction();
+    void toggleQuickSettingsAction();
     void resetCropAction();
     void toggleMenuBarAction();
     void toggleHeaderAction();

@@ -148,7 +148,7 @@ Decide on a fork version scheme when there is a first release.
 
 Not done: keep-above toggle (no Wayland client API; use a KWin rule).
 
-## Phase 3 — crop to content
+## Phase 3 — crop to content (done 2026-09-27)
 
 **mpv side.** libmpv 0.41 has the `video-crop` property (`WxH+X+Y`, source
 pixels, applies live without reloading the file). Reset with `video-crop=""`.
@@ -201,6 +201,38 @@ cannot constrain an interactive resize. Options:
 
 **Estimate:** medium. Crop mode overlay ~250 lines QML; mapping + a few
 observed properties ~80 lines C++ in `mpvitem.cpp`; persistence ~60 lines.
+
+**Status.** Implemented: `C` pauses and opens `CropOverlay` (drag/move/resize
+box, Enter or double-click applies, Esc cancels), mapped through
+`osd-dimensions` to source pixels and applied with `video-crop`; `Shift+C`
+resets. Crop is lifted on file change (it is an mpv option and would carry
+over), refused while rotated/flipped (video-crop is pre-rotation), the box
+relayouts on window resize, and the window resize handles hide while
+selecting. In chromeless mode `Main.fitWindowToPicture()` sets the window
+height from the displayed picture after every reconfig/crop, so the window is
+the picture. Auto-detect (cropdetect) and per-file persistence: not done.
+
+## Phase 3b — Quick Settings pane and hover chrome (done 2026-09-27)
+
+- `QuickSettings.qml`: IINA-style sidebar on the right edge (`P`, footer
+  button, right-click, View menu; close X). Tabs: Video (track, aspect ratio
+  presets, crop presets + Custom…, rotation, flip/mirror/deinterlace, speed,
+  brightness/contrast/saturation/gamma/hue), Audio (track, volume, delay,
+  10-band equalizer with presets via `af @ffeq:lavfi=[firequalizer…]`, audio
+  device), Subtitles (primary/secondary track, load external, delay, position,
+  scale, font/size/bold/italic/colors/border/shadow through SubtitlesSettings).
+  Values mpv does not notify about are re-read when the pane opens and after
+  file load (`audioTracksModelChanged`) / video reconfig.
+- The playlist *panel* and its mouse slide-in are gone for good; the playlist
+  engine stays. `togglePlaylistAction` has no default shortcut any more.
+  Playlist settings page still shows panel knobs that do nothing (clean up).
+- `FloatingWindowControls.qml`: in chromeless mode, mouse movement shows a
+  translucent bar with title and minimize/maximize/close (Breeze icons); drag
+  moves, double-click maximizes.
+- Context menu: Open File, Add/Remove Chrome, Quick Settings, Crop…, Reset
+  Crop, playback, Open URL, …, Quit.
+- Not done from IINA: online subtitle search, video EQ beyond the five
+  sliders, per-file remembered settings.
 
 ## Phase 4 — polish
 

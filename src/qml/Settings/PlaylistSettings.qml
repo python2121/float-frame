@@ -229,16 +229,6 @@ SettingsBasePage {
 
         Item { Layout.preferredWidth: 1; Layout.preferredHeight: 1 }
         CheckBox {
-            checked: PlaylistSettings.canToggleWithMouse
-            text: KI18n.i18nc("@option:check", "Toggle with mouse")
-            onClicked: {
-                PlaylistSettings.canToggleWithMouse = checked
-                PlaylistSettings.save()
-            }
-        }
-
-        Item { Layout.preferredWidth: 1; Layout.preferredHeight: 1 }
-        CheckBox {
             text: KI18n.i18nc("@option:check", "Increase font size when fullscreen")
             checked: PlaylistSettings.bigFontFullscreen
             enabled: PlaylistSettings.style === "compact" ? false : true

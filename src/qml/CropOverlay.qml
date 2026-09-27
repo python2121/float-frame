@@ -27,6 +27,7 @@ Item {
     // selection and the picture rectangle, in item coordinates
     property rect selection: Qt.rect(0, 0, 0, 0)
     property rect videoRect: Qt.rect(0, 0, width, height)
+    property var videoParams: null   // video-params, cached while selecting
     property int handleSize: 12
     property int minSize: 24
 
@@ -39,11 +40,35 @@ Item {
     focus: active
 
     function open() : void {
+        root.videoParams = root.m_mpv.getProperty("video-params")
         updateVideoRect()
         selection = root.videoRect
         active = true
         forceActiveFocus()
+        // a closing context menu may hand focus back to its previous item
+        Qt.callLater(() => { if (root.active) root.forceActiveFocus() })
     }
+
+    // the item resizes while selecting (window fit after lifting a crop, or the
+    // user resizing): keep the selection at the same relative position
+    function relayout() : void {
+        if (!root.active) {
+            return
+        }
+        const old = root.videoRect
+        const sel = root.selection
+        updateVideoRect()
+        const vr = root.videoRect
+        if (old.width <= 0 || old.height <= 0 || vr.width <= 0 || vr.height <= 0) {
+            root.selection = vr
+            return
+        }
+        const sx = vr.width / old.width
+        const sy = vr.height / old.height
+        root.selection = Qt.rect(vr.x + (sel.x - old.x) * sx, vr.y + (sel.y - old.y) * sy, sel.width * sx, sel.height * sy)
+    }
+    onWidthChanged: relayout()
+    onHeightChanged: relayout()
 
     function cancel() : void {
         active = false
@@ -75,7 +100,7 @@ Item {
 
     // selection → source pixels (video-params/w,h; even numbers for chroma subsampling)
     function toSourceRect() : rect {
-        const params = root.m_mpv.getProperty("video-params")
+        const params = root.videoParams
         if (!params || !params.w || !params.h || root.videoRect.width <= 0 || root.videoRect.height <= 0) {
             return Qt.rect(0, 0, 0, 0)
         }
@@ -115,10 +140,13 @@ Item {
             return { edges: 0, inside: false }
         }
         let edges = 0
-        if (Math.abs(x - s.x) <= hs) edges |= Qt.LeftEdge
-        if (Math.abs(x - (s.x + s.width)) <= hs) edges |= Qt.RightEdge
-        if (Math.abs(y - s.y) <= hs) edges |= Qt.TopEdge
-        if (Math.abs(y - (s.y + s.height)) <= hs) edges |= Qt.BottomEdge
+        const dl = Math.abs(x - s.x), dr = Math.abs(x - (s.x + s.width))
+        const dt = Math.abs(y - s.y), db = Math.abs(y - (s.y + s.height))
+        // narrow selections: only the nearer of two opposite edges
+        if (dl <= hs && dl <= dr) edges |= Qt.LeftEdge
+        else if (dr <= hs) edges |= Qt.RightEdge
+        if (dt <= hs && dt <= db) edges |= Qt.TopEdge
+        else if (db <= hs) edges |= Qt.BottomEdge
         return { edges: edges, inside: edges === 0 }
     }
 
@@ -212,7 +240,15 @@ Item {
             hoverRegion = root.regionAt(mouse.x, mouse.y)
         }
 
-        onDoubleClicked: root.apply()
+        onDoubleClicked: {
+            // the second press of a double-click outside the box started a new
+            // (empty) selection; apply the one the user actually had
+            if (mode === "new") {
+                root.selection = pressSelection
+            }
+            mode = ""
+            root.apply()
+        }
     }
 
     // dim everything outside the selection
@@ -275,16 +311,19 @@ Item {
                 Layout.rightMargin: Kirigami.Units.largeSpacing
             }
             ToolButton {
+                focusPolicy: Qt.NoFocus   // Enter must apply the crop, not re-click a button
                 text: KI18n.i18nc("@action:button", "Whole picture")
                 icon.name: "zoom-fit-best"
                 onClicked: root.selection = root.videoRect
             }
             ToolButton {
+                focusPolicy: Qt.NoFocus   // Enter must apply the crop, not re-click a button
                 text: KI18n.i18nc("@action:button", "Cancel")
                 icon.name: "dialog-cancel"
                 onClicked: root.cancel()
             }
             ToolButton {
+                focusPolicy: Qt.NoFocus   // Enter must apply the crop, not re-click a button
                 text: KI18n.i18nc("@action:button", "Crop")
                 icon.name: "transform-crop"
                 highlighted: true

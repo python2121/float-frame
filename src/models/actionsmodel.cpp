@@ -439,7 +439,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"togglePlaylistAction"_s;
     action.text = i18nc("@action", "Playlist");
     action.iconName = u"view-media-playlist"_s;
-    action.defaultShortcut = Qt::Key_P;
+    action.defaultShortcut = QKeySequence(); // Float Frame: the playlist panel is gone, P opens Quick Settings
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -652,6 +652,14 @@ ActionsModel::ActionsModel(QObject *parent)
     action.defaultShortcut = Qt::Key_C;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = i18nc("@info", "Pause and drag a rectangle over the part of the picture to keep; the rest is cropped away and the window follows.");
+    m_actions << action;
+
+    action.name = u"toggleQuickSettingsAction"_s;
+    action.text = i18nc("@action", "Quick Settings");
+    action.iconName = u"configure"_s;
+    action.defaultShortcut = Qt::Key_P;
+    action.shortcut = getShortcut(action.name, action.defaultShortcut);
+    action.description = i18nc("@info", "Video, audio and subtitle controls in a side pane.");
     m_actions << action;
 
     action.name = u"resetCropAction"_s;

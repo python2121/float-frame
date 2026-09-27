@@ -31,6 +31,7 @@ Item {
     signal openFileDialog()
     signal openSubtitleDialog()
     signal togglePlaylist()
+    signal toggleQuickSettings()
     signal toggleTranscript()
 
     Instantiator {
@@ -360,6 +361,10 @@ Item {
             if (mainWindow.chromeless) {
                 root.m_osd.message(mainWindow.chromelessHintText())
             }
+        }
+
+        function onToggleQuickSettingsAction() {
+            root.toggleQuickSettings()
         }
 
         function onCropToContentAction() {

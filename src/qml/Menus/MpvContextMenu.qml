@@ -62,6 +62,7 @@ Loader {
             root.active = false
         }
 
+        MenuItem { action: HarunaApp.actions.openFileAction }
         MenuItem {
             action: HarunaApp.actions.toggleChromelessAction
             text: {
@@ -71,6 +72,10 @@ Loader {
                         : KI18n.i18nc("@action:inmenu", "Remove Chrome")
             }
         }
+
+        MenuSeparator {}
+
+        MenuItem { action: HarunaApp.actions.toggleQuickSettingsAction }
         MenuItem { action: HarunaApp.actions.cropToContentAction }
         MenuItem {
             action: HarunaApp.actions.resetCropAction
@@ -92,7 +97,6 @@ Loader {
 
         MenuSeparator {}
 
-        MenuItem { action: HarunaApp.actions.openFileAction }
         MenuItem { action: HarunaApp.actions.openUrlAction }
 
         MenuSeparator {}
@@ -108,5 +112,9 @@ Loader {
         MenuSeparator {}
 
         MenuItem { action: HarunaApp.actions.configureAction }
+
+        MenuSeparator {}
+
+        MenuItem { action: HarunaApp.actions.quitApplicationAction }
     }
 }

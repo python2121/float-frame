@@ -26,6 +26,9 @@
     <entry name="ChromelessHintShown" type="bool">
       <default>false</default>
     </entry>
+    <entry name="QuickSettingsWidth" type="int">
+      <default>340</default>
+    </entry>
     <entry name="ShowChapterMarkers" type="bool">
       <default>true</default>
     </entry>
