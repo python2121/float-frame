@@ -301,7 +301,7 @@ void MprisItem::setupMpvConnections()
         d_ptr->mprisController.setCanPause(true);
         d_ptr->mprisController.setCanSeek(true);
 
-        const auto trackId = u"/org/kde/haruna/track/%1"_s.arg(playlistItemIndex);
+        const auto trackId = u"/io/github/python2121/FloatFrame/track/%1"_s.arg(playlistItemIndex);
         d_ptr->mprisController.setMetadata(u"mpris:trackid"_s, trackId);
         d_ptr->mprisController.setMetadata(u"xesam:url"_s, url.toString());
 

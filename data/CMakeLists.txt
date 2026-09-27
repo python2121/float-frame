@@ -6,18 +6,7 @@
 
 set(ICONS_FOLDER ${PROJECT_SOURCE_DIR}/data/icons)
 set(ICON_FILES
-    ${ICONS_FOLDER}/sc-apps-haruna.svg
-    ${ICONS_FOLDER}/16-apps-haruna.png
-    ${ICONS_FOLDER}/22-apps-haruna.png
-    ${ICONS_FOLDER}/32-apps-haruna.png
-    ${ICONS_FOLDER}/44-apps-haruna.png
-    ${ICONS_FOLDER}/48-apps-haruna.png
-    ${ICONS_FOLDER}/64-apps-haruna.png
-    ${ICONS_FOLDER}/128-apps-haruna.png
-    ${ICONS_FOLDER}/150-apps-haruna.png
-    ${ICONS_FOLDER}/256-apps-haruna.png
-    ${ICONS_FOLDER}/310-apps-haruna.png
-    ${ICONS_FOLDER}/512-apps-haruna.png
+    ${ICONS_FOLDER}/sc-apps-io.github.python2121.FloatFrame.svg
 )
 
 # used in src/CMakeLists.txt
@@ -29,5 +18,5 @@ ecm_install_icons(
     THEME hicolor
 )
 
-install(FILES org.kde.haruna.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-install(FILES org.kde.haruna.metainfo.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
+install(FILES io.github.python2121.FloatFrame.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES io.github.python2121.FloatFrame.metainfo.xml DESTINATION ${KDE_INSTALL_METAINFODIR})

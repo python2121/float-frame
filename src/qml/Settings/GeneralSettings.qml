@@ -83,8 +83,8 @@ SettingsBasePage {
             }
 
             ToolTipButton {
-                toolTipText: KI18n.i18nc("@info:tooltip", "Trying to open another Haruna instance will do nothing.<br>"+
-                                   "Trying to open another file with Haruna will open the file in the running instance.")
+                toolTipText: KI18n.i18nc("@info:tooltip", "Trying to open another Float Frame instance will do nothing.<br>"+
+                                   "Trying to open another file with Float Frame will open the file in the running instance.")
 
                 Layout.preferredHeight: Kirigami.Units.iconSizes.medium
             }

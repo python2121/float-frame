@@ -71,7 +71,7 @@ MprisController::MprisController(QObject *parent)
     });
 
     // register mpris dbus service
-    QDBusConnection::sessionBus().registerService(u"org.mpris.MediaPlayer2.haruna"_s);
+    QDBusConnection::sessionBus().registerService(u"org.mpris.MediaPlayer2.floatframe"_s);
     QDBusConnection::sessionBus().registerObject(u"/org/mpris/MediaPlayer2"_s, this, QDBusConnection::ExportAdaptors);
 }
 

@@ -190,18 +190,20 @@ void Application::aboutDataAddComponent(const KAboutComponent &component)
 
 void Application::setupAboutData()
 {
-    m_aboutData.setComponentName(u"haruna"_s);
-    m_aboutData.setDisplayName(i18nc("application title/display name", "Haruna"));
+    m_aboutData.setComponentName(u"floatframe"_s);
+    m_aboutData.setDisplayName(i18nc("application title/display name", "Float Frame"));
     m_aboutData.setVersion(Application::version().toUtf8());
-    m_aboutData.setShortDescription(i18nc("@title", "Media player"));
+    m_aboutData.setShortDescription(i18nc("@title", "Floating, chromeless media player"));
     m_aboutData.setLicense(KAboutLicense::GPL_V3);
-    m_aboutData.setCopyrightStatement(i18nc("copyright statement, use copyright symbol and en dash for the year range", "© 2019–2025"));
-    m_aboutData.setHomepage(u"https://haruna.kde.org"_s);
-    m_aboutData.setBugAddress(u"https://bugs.kde.org/enter_bug.cgi?product=Haruna"_s.toUtf8());
-    m_aboutData.setDesktopFileName(u"org.kde.haruna"_s);
+    m_aboutData.setCopyrightStatement(
+        i18nc("copyright statement, use copyright symbol and en dash for the year range", "© 2019–2025 Haruna contributors, © 2026 Float Frame contributors"));
+    m_aboutData.setHomepage(u"https://github.com/python2121/float-frame"_s);
+    m_aboutData.setBugAddress(u"https://github.com/python2121/float-frame/issues"_s.toUtf8());
+    m_aboutData.setDesktopFileName(u"io.github.python2121.FloatFrame"_s);
 
+    m_aboutData.addAuthor(i18nc("@info:credit", "Andrew"), i18nc("@info:credit", "Float Frame"), u"python21@gmail.com"_s, u"https://github.com/python2121"_s);
     m_aboutData.addAuthor(i18nc("@info:credit", "George Florea Bănuș"),
-                          i18nc("@info:credit", "Developer"),
+                          i18nc("@info:credit", "Haruna developer"),
                           u"georgefb899@gmail.com"_s,
                           u"https://georgefb.com"_s);
 

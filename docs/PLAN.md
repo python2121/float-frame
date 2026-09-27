@@ -118,27 +118,33 @@ a human: drag-to-move feel, edge/corner resize, live toggle with Ctrl+Shift+F.
 Extra: right-click while the context menu is showing now closes it instead of
 reopening it at the pointer (`MpvContextMenu.toggle()`).
 
-## Phase 2 — make it its own app
+## Phase 2 — make it its own app (done 2026-09-27)
 
-Rename so it coexists with Flathub Haruna and is a proper KDE citizen:
+Float Frame runs alongside Flathub Haruna as a separate application:
 
-- App id `io.github.python2121.FloatFrame`: `KAboutData::setDesktopFileName`,
-  `QApplication::setApplicationName("floatframe")`, MPRIS service name,
-  KDSingleApplication key. (Config/DB already live in the sandboxed
-  `~/.var/app/io.github.python2121.FloatFrame/`, so no clash with Haruna's
-  files even before the rename; the clash is only D-Bus names and the
-  Wayland `app_id`.)
-- `data/`: rename desktop file, metainfo, icon (new icon later; reuse
-  Haruna's for now — GPL-3.0-or-later, keep the copyright notices).
-- Drop the `rename-*` lines from the manifest once the sources use the new id.
-- Desktop file: add an `Actions=` entry for chromeless launch; keep
-  `MimeType=` so it shows in "Open with" for video files.
-- Optional: "Keep above" toggle. KWin on Wayland has no client API for
-  keep-above (KWindowSystem's `setState` is X11-only), so document a KWin
-  window rule for the app id instead, or ship one via `kwinrulesrc` example.
+- App id `io.github.python2121.FloatFrame` everywhere KWin, Plasma or D-Bus
+  can see it: `KAboutData::setDesktopFileName` (Wayland `app_id`),
+  `data/io.github.python2121.FloatFrame.{desktop,metainfo.xml}`, own SVG icon
+  (`data/icons/sc-apps-<id>.svg`), screen-saver inhibit id, taskbar-progress
+  launcher id, MPRIS service `org.mpris.MediaPlayer2.floatframe`, MPRIS track
+  id path. Application/component name `floatframe`, display name and window
+  title "Float Frame", about data with fork homepage/bug tracker and both the
+  Haruna author and the fork author.
+- The desktop file has an "Open Chromeless" action (`haruna --chromeless %U`).
+- Flatpak manifest no longer needs `rename-*`; the sources carry the id.
 
-**Estimate:** small, mostly mechanical. Do it before Phase 3 so testing does
-not disturb the installed Haruna.
+**Kept as Haruna on purpose** (internal, invisible to users, and the bulk of
+upstream's diff surface): the binary and CMake target `haruna`, the QML module
+URIs `org.kde.haruna*`, the translation domain `haruna` (so upstream
+translations keep working), logging categories, the kcfg config file
+`haruna/haruna.conf` and the SQLite file names. Config and data live in the
+sandbox at `~/.var/app/io.github.python2121.FloatFrame/`, so nothing collides
+with Haruna anyway.
+
+Version still follows upstream (`project(haruna VERSION …)`), shown in About.
+Decide on a fork version scheme when there is a first release.
+
+Not done: keep-above toggle (no Wayland client API; use a KWin rule).
 
 ## Phase 3 — crop to content
 

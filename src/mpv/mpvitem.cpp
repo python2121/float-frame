@@ -712,7 +712,7 @@ void MpvItem::updateTaskbarPlaybackProgress()
         map.insert(u"progress"_s, position() / duration());
 
         QDBusMessage msg = QDBusMessage::createSignal(u"/org/kde/haruna"_s, u"com.canonical.Unity.LauncherEntry"_s, u"Update"_s);
-        msg << u"application://org.kde.haruna.desktop"_s << map;
+        msg << u"application://io.github.python2121.FloatFrame.desktop"_s << map;
 
         QDBusConnection::sessionBus().send(msg);
     });

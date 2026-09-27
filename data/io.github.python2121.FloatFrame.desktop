@@ -1,0 +1,25 @@
+#
+# SPDX-FileCopyrightText: 2020 George Florea Bănuș <georgefb899@gmail.com>
+# SPDX-FileCopyrightText: 2026 Float Frame contributors
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Desktop Entry]
+Name=Float Frame
+GenericName=Media Player
+Comment=Floating, chromeless video player built on Haruna and mpv
+Exec=haruna %U
+Icon=io.github.python2121.FloatFrame
+Type=Application
+Categories=Qt;KDE;AudioVideo;Player;Video;TV;
+MimeType=video/mp4;video/x-matroska;video/mpeg;video/ogg;video/quicktime;video/vnd.avi;video/mp2t;video/webm;video/x-ms-wmv;audio/aac;audio/ac3;audio/flac;audio/mp4;audio/mpeg;audio/ogg;audio/vnd.wave;audio/webm;audio/x-matroska;audio/x-mpegurl;
+X-KDE-Protocols=ftp,http,https,mms,rtmp,rtsp,sftp,srt
+Terminal=false
+StartupWMClass=haruna
+Actions=Chromeless;
+
+[Desktop Action Chromeless]
+Name=Open Chromeless
+Exec=haruna --chromeless %U
+Icon=io.github.python2121.FloatFrame

@@ -1,15 +1,11 @@
 # Float Frame Flatpak manifest.
 # Derived from Flathub's org.kde.haruna manifest (https://github.com/flathub/org.kde.haruna);
-# only the app-id, the renames and the haruna source (local dir) differ.
+# only the app-id, the MPRIS name and the haruna source (local dir) differ.
 app-id: io.github.python2121.FloatFrame
 runtime: org.kde.Platform
 runtime-version: 6.11
 sdk: org.kde.Sdk
 command: haruna
-rename-icon: haruna
-copy-icon: true
-rename-desktop-file: org.kde.haruna.desktop
-rename-appdata-file: org.kde.haruna.metainfo.xml
 finish-args:
   - --share=ipc
   - --share=network
@@ -23,7 +19,7 @@ finish-args:
   - --filesystem=xdg-data/Trash
   - --talk-name=org.freedesktop.ScreenSaver
   - --talk-name=org.freedesktop.FileManager1
-  - --own-name=org.mpris.MediaPlayer2.haruna
+  - --own-name=org.mpris.MediaPlayer2.floatframe
   - --system-talk-name=org.freedesktop.UDisks2
 cleanup:
   - '*.a'

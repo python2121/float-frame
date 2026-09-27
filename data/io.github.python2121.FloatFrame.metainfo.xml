@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ SPDX-FileCopyrightText: 2026 Float Frame contributors
+
+ SPDX-License-Identifier: CC0-1.0
+ -->
+<component type="desktop-application">
+  <id>io.github.python2121.FloatFrame</id>
+  <launchable type="desktop-id">io.github.python2121.FloatFrame.desktop</launchable>
+  <name>Float Frame</name>
+  <summary>Floating, chromeless video player</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.python2121">
+    <name>Float Frame contributors</name>
+  </developer>
+  <description>
+    <p>
+      Float Frame is a fork of KDE's Haruna media player for a floating video
+      window on KDE Plasma. Its chromeless mode removes the window frame, menu
+      bar, toolbar and docked footer so only the video shows; drag it to move
+      the window, drag its edges to resize. A crop-to-content mode trims the
+      window to the actual picture.
+    </p>
+    <p>Everything else is Haruna: mpv playback, playlists, subtitles, MPRIS.</p>
+  </description>
+  <url type="homepage">https://github.com/python2121/float-frame</url>
+  <url type="bugtracker">https://github.com/python2121/float-frame/issues</url>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Video</category>
+    <category>Player</category>
+  </categories>
+  <content_rating type="oars-1.1" />
+  <provides>
+    <mediatype>video/mp4</mediatype>
+    <mediatype>video/x-matroska</mediatype>
+    <mediatype>video/webm</mediatype>
+  </provides>
+  <releases>
+    <release version="1.8.1" date="2026-09-27">
+      <description><p>Fork of Haruna 1.8.1 (master) with chromeless window mode.</p></description>
+    </release>
+  </releases>
+</component>

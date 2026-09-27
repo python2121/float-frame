@@ -23,9 +23,14 @@ SteamOS has a read-only root, so Float Frame is built and run as a Flatpak
 using the `org.flatpak.Builder` Flatpak and the KDE 6.11 runtime.
 
 ```sh
-flatpak/build.sh                              # build + install for the current user
-flatpak run io.github.python2121.FloatFrame   # run
+flatpak/build.sh                                          # build + install for the current user
+flatpak run io.github.python2121.FloatFrame               # run
+flatpak run io.github.python2121.FloatFrame --chromeless  # start without any chrome
 ```
+
+It installs as its own app (id `io.github.python2121.FloatFrame`, "Float
+Frame" in the launcher) and coexists with Flathub's Haruna. Chromeless mode:
+`Ctrl+Shift+F`, the View menu, or the "Open Chromeless" launcher action.
 
 The manifest is derived from Flathub's `org.kde.haruna` manifest and builds
 libmpv, mpvqt and friends from source; the first build takes a while, later
