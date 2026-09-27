@@ -1,60 +1,42 @@
-<!--
-SPDX-FileCopyrightText: 2020 George Florea Bănuș <georgefb899@gmail.com>
+# Float Frame
 
-SPDX-License-Identifier: CC-BY-4.0
--->
+A fork of [Haruna](https://invent.kde.org/multimedia/haruna) (KDE's mpv-based
+video player) for a floating, chromeless video window on KDE Plasma /
+SteamOS desktop mode.
 
-### [Read before reporting a bug or requesting a feature](./bugs_and_feature_requests.md)
+Two additions over Haruna:
 
-----
+- **Chromeless mode.** No title bar, header, menu bar or docked footer — just
+  the video and Haruna's floating controls. Drag anywhere to move the window,
+  drag the edges to resize; it stays a normal KWin window (rules, tiling,
+  Meta+drag, virtual desktops all work).
+- **Crop to content.** Pause, drag a box around the real picture, and the
+  player crops the video to it and resizes the window to match, so the
+  floating window *is* the content.
 
-#### Donate: [GitHub Sponsors](https://github.com/sponsors/g-fb) | [Liberapay](https://liberapay.com/gfb/) | [PayPal](https://paypal.me/georgefloreabanus)
+Everything else is unmodified Haruna and the fork tracks upstream `master`.
+See [`docs/PLAN.md`](docs/PLAN.md) for the design and status.
 
-# Haruna
+## Build (Flatpak)
 
-Haruna is an open source media player built with Qt/QML and libmpv.
+SteamOS has a read-only root, so Float Frame is built and run as a Flatpak
+using the `org.flatpak.Builder` Flatpak and the KDE 6.11 runtime.
 
-![Haruna main window](./data/screenshots/haruna-dark.png)
-For more screnshots go to [Haruna's website](https://haruna.kde.org)
-
-# Install
-
-<a href='https://flathub.org/en/apps/org.kde.haruna'><img width='190px' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png'/></a>
-
+```sh
+flatpak/build.sh                              # build + install for the current user
+flatpak run io.github.python2121.FloatFrame   # run
 ```
-flatpak install flathub org.kde.haruna
-flatpak run org.kde.haruna
+
+The manifest is derived from Flathub's `org.kde.haruna` manifest and builds
+libmpv, mpvqt and friends from source; the first build takes a while, later
+ones are cached.
+
+## Upstream
+
+```sh
+git fetch upstream
+git rebase upstream/master   # on main
 ```
 
-[Flatpak setup guide](https://flatpak.org/setup/)
-
-# Features
-
-these are just some features that set Haruna apart from others players
-
-- video preview on seek/progress bar
-
-- play online videos, through youtube-dl
-
-- toggle playlist with mouse-over, playlist overlays the video
-
-- auto skip chapter containing certain words
-
-- configurable shortcuts and mouse buttons
-
-- quick jump to next chapter by middle click on progress bar
-
-- custom mpv commands, can be run at start up or on keyboard shortcut
-
-# Dependencies
-Dependencies will be printed by `cmake` when building.
-
-# Build
-
-```bash
-git clone https://invent.kde.org/multimedia/haruna.git
-cd haruna
-cmake -B build -G Ninja
-cmake --build build
-cmake --install build
-```
+Haruna is © George Florea Bănuș and contributors, GPL-3.0-or-later; see
+`LICENSES/` and the upstream README in the git history.

@@ -130,3 +130,9 @@ cmake-build-debug*
 .vscode
 
 
+
+# Float Frame flatpak build outputs
+flatpak/build/
+flatpak/repo/
+flatpak/.flatpak-builder/
+flatpak/*.log
