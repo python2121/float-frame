@@ -201,6 +201,12 @@ observed properties ~80 lines C++ in `mpvitem.cpp`; persistence ~60 lines.
 - OSD hints the first time chromeless is entered ("drag to move, edges to
   resize, `Ctrl+Shift+F` to restore").
 - Cursor auto-hide in chromeless (upstream only hides in fullscreen).
+- Touch (Deck screen): 8 px resize edges are ~1 mm and a 10 px drag threshold
+  turns wobbly taps into moves. Enlarge handles / threshold for touch devices
+  (`PointerDevice.TouchScreen`), or add a `DragHandler` with a bigger threshold.
+- The compositor's pointer grab during a move also fires Haruna's
+  `applicationMouseLeave`, which starts the floating footer's hide timer
+  (cosmetic).
 - Keyboard-only crop nudging (arrow keys move/resize the rectangle by 2 px).
 - Upstream rebase routine: `git fetch upstream && git rebase upstream/master`
   on `main`; conflicts should be limited to `Main.qml`, `MpvVideo.qml`,

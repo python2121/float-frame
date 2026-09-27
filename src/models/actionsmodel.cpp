@@ -436,14 +436,6 @@ ActionsModel::ActionsModel(QObject *parent)
     action.description = QString{};
     m_actions << action;
 
-    action.name = u"toggleChromelessAction"_s;
-    action.text = i18nc("@action", "Toggle Chromeless Window");
-    action.iconName = u"view-restore"_s;
-    action.defaultShortcut = Qt::CTRL | Qt::SHIFT | Qt::Key_F;
-    action.shortcut = getShortcut(action.name, action.defaultShortcut);
-    action.description = i18nc("@info", "Hide the window frame, menu bar, toolbar and docked footer. Drag the video to move the window, drag its edges to resize.");
-    m_actions << action;
-
     action.name = u"togglePlaylistAction"_s;
     action.text = i18nc("@action", "Playlist");
     action.iconName = u"view-media-playlist"_s;
@@ -642,6 +634,16 @@ ActionsModel::ActionsModel(QObject *parent)
     action.defaultShortcut = Qt::CTRL | Qt::Key_7;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
+    m_actions << action;
+
+    // Float Frame actions are appended here to keep upstream rebases clean
+
+    action.name = u"toggleChromelessAction"_s;
+    action.text = i18nc("@action", "Toggle Chromeless Window");
+    action.iconName = u"view-restore"_s;
+    action.defaultShortcut = Qt::CTRL | Qt::SHIFT | Qt::Key_F;
+    action.shortcut = getShortcut(action.name, action.defaultShortcut);
+    action.description = i18nc("@info", "Hide the window frame, menu bar, toolbar and docked footer. Drag the video to move the window, drag its edges to resize.");
     m_actions << action;
 }
 

@@ -77,13 +77,6 @@ MpvItem {
             return root.window.chromeless === true && !root.window.isFullScreen()
         }
 
-        function triggerMouseAction(button: int, modifiers: int, isDoubleClick: bool) : void {
-            const actionName = Models.mouseActionsModel.getAction(button, modifiers, isDoubleClick)
-            if (actionName) {
-                HarunaApp.actions[actionName].trigger()
-            }
-        }
-
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton | Qt.ForwardButton | Qt.BackButton
         anchors.fill: parent
         hoverEnabled: true
@@ -99,7 +92,7 @@ MpvItem {
                 const distance = Math.hypot(mouseX - pressPosition.x, mouseY - pressPosition.y)
                 if (distance >= Application.styleHints.startDragDistance) {
                     leftActionPending = false
-                    SystemUtils.startSystemMove(root.window)
+                    SystemUtils.startSystemMove(root.window, mouseArea)
                     return
                 }
             }
@@ -145,13 +138,34 @@ MpvItem {
                 pressModifiers = mouse.modifiers
                 return
             }
-            triggerMouseAction(mouse.button, mouse.modifiers, false)
+            const model = Models.mouseActionsModel
+            let actionName
+            let modifier = mouse.modifiers
+            if (mouse.button === Qt.LeftButton) {
+                actionName = model.getAction(Qt.LeftButton, modifier)
+            } else if (mouse.button === Qt.MiddleButton) {
+                actionName = model.getAction(Qt.MiddleButton, modifier)
+            } else if (mouse.button === Qt.RightButton) {
+                actionName = model.getAction(Qt.RightButton, modifier)
+            } else if (mouse.button === Qt.ForwardButton) {
+                actionName = model.getAction(Qt.ForwardButton, modifier)
+            } else if (mouse.button === Qt.BackButton) {
+                actionName = model.getAction(Qt.BackButton, modifier)
+            }
+
+            if (actionName) {
+                HarunaApp.actions[actionName].trigger()
+            }
         }
 
         onReleased: function(mouse) {
+            // chromeless: the left press was not a drag, run its action now
             if (leftActionPending && mouse.button === Qt.LeftButton) {
                 leftActionPending = false
-                triggerMouseAction(mouse.button, pressModifiers, false)
+                const actionName = Models.mouseActionsModel.getAction(Qt.LeftButton, pressModifiers)
+                if (actionName) {
+                    HarunaApp.actions[actionName].trigger()
+                }
             }
         }
 
@@ -161,7 +175,24 @@ MpvItem {
 
         onDoubleClicked: function(mouse) {
             focus = true
-            triggerMouseAction(mouse.button, mouse.modifiers, true)
+            const model = Models.mouseActionsModel
+            let actionName
+            let modifier = mouse.modifiers
+            if (mouse.button === Qt.LeftButton) {
+                actionName = model.getAction(Qt.LeftButton, modifier, true)
+            } else if (mouse.button === Qt.MiddleButton) {
+                actionName = model.getAction(Qt.MiddleButton, modifier, true)
+            } else if (mouse.button === Qt.RightButton) {
+                actionName = model.getAction(Qt.RightButton, modifier, true)
+            } else if (mouse.button === Qt.ForwardButton) {
+                actionName = model.getAction(Qt.ForwardButton, modifier, true)
+            } else if (mouse.button === Qt.BackButton) {
+                actionName = model.getAction(Qt.BackButton, modifier, true)
+            }
+
+            if (actionName) {
+                HarunaApp.actions[actionName].trigger()
+            }
         }
     }
 

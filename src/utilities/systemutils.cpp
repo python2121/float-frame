@@ -8,6 +8,8 @@
 
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QPointer>
+#include <QQuickItem>
 #include <QWindow>
 
 #include <KIO/ApplicationLauncherJob>
@@ -96,20 +98,46 @@ bool SystemUtils::openMediaInfo(const QUrl &url)
     return false;
 }
 
-bool SystemUtils::startSystemMove(QObject *window)
+// Queued so it runs after the current press/move handler has finished; the
+// delivery agent would otherwise re-grab for an accepted press.
+static void releaseMouseGrabLater(QObject *grabber)
+{
+    QPointer<QQuickItem> item = qobject_cast<QQuickItem *>(grabber);
+    if (item.isNull()) {
+        return;
+    }
+    QMetaObject::invokeMethod(
+        item.data(),
+        [item]() {
+            if (item) {
+                item->ungrabMouse();
+            }
+        },
+        Qt::QueuedConnection);
+}
+
+bool SystemUtils::startSystemMove(QObject *window, QObject *grabber)
 {
     auto *qWindow = qobject_cast<QWindow *>(window);
     if (qWindow == nullptr) {
         return false;
     }
-    return qWindow->startSystemMove();
+    const bool started = qWindow->startSystemMove();
+    if (started) {
+        releaseMouseGrabLater(grabber);
+    }
+    return started;
 }
 
-bool SystemUtils::startSystemResize(QObject *window, int edges)
+bool SystemUtils::startSystemResize(QObject *window, int edges, QObject *grabber)
 {
     auto *qWindow = qobject_cast<QWindow *>(window);
     if (qWindow == nullptr || edges == 0) {
         return false;
     }
-    return qWindow->startSystemResize(Qt::Edges::fromInt(edges));
+    const bool started = qWindow->startSystemResize(Qt::Edges::fromInt(edges));
+    if (started) {
+        releaseMouseGrabLater(grabber);
+    }
+    return started;
 }

@@ -21,10 +21,12 @@ Item {
     property int cornerSize: 16
 
     component Handle: MouseArea {
+        id: handle
+
         required property int edges
 
         acceptedButtons: Qt.LeftButton
-        onPressed: SystemUtils.startSystemResize(root.targetWindow, edges)
+        onPressed: SystemUtils.startSystemResize(root.targetWindow, handle.edges, handle)
     }
 
     // edges

@@ -27,10 +27,13 @@ public:
     Q_INVOKABLE static bool openMediaInfo(const QUrl &url);
     // Ask the window system to start an interactive move/resize of a frameless
     // window (xdg_toplevel move/resize on Wayland). QWindow has these but they
-    // are not Q_INVOKABLE, so QML cannot call them directly. Takes a QObject so
-    // any QML Window converts; `edges` is a Qt.Edges combination.
-    Q_INVOKABLE static bool startSystemMove(QObject *window);
-    Q_INVOKABLE static bool startSystemResize(QObject *window, int edges);
+    // are not Q_INVOKABLE, so QML cannot call them directly. `window` is any QML
+    // Window, `edges` a Qt.Edges combination and `grabber` the MouseArea that
+    // received the press: the compositor owns the pointer from now on and may
+    // never deliver the button release, so the grabber's mouse grab is released
+    // (resetting its pressed state) once the request has been sent.
+    Q_INVOKABLE static bool startSystemMove(QObject *window, QObject *grabber);
+    Q_INVOKABLE static bool startSystemResize(QObject *window, int edges, QObject *grabber);
 };
 
 #endif // SYSTEMUTILS_H
