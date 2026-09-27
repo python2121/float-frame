@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+pragma ComponentBehavior: Bound
+
 import QtQml
 import QtQuick
 import QtQuick.Controls
@@ -17,12 +19,55 @@ Menu {
 
     required property MpvVideo m_mpv
 
-    title: KI18n.i18nc("@title:menu", "&Subtitles")
+    // Float Frame: the first subtitle tracks sit directly in this menu; the
+    // full "Primary Subtitle" submenu only appears when there are more.
+    readonly property int inlineTrackCount: 5
+    readonly property bool hasMoreTracks: root.m_mpv.subtitleTracksModel.rowCount > inlineTrackCount
 
-    SubtitleTracksMenu {
+    property SubtitleTracksMenu allPrimaryTracksMenu: SubtitleTracksMenu {
         m_mpv: root.m_mpv
         isPrimarySubtitleMenu: true
-        title: KI18n.i18nc("@title:menu", "Primary Subtitle")
+        title: KI18n.i18nc("@title:menu", "All Subtitle Tracks")
+    }
+
+    property bool allTracksMenuShown: false
+
+    function syncAllTracksMenu() : void {
+        if (root.hasMoreTracks && !root.allTracksMenuShown) {
+            // after the inline items (hidden ones included), before the secondary submenu
+            root.insertMenu(root.m_mpv.subtitleTracksModel.rowCount, root.allPrimaryTracksMenu)
+            root.allTracksMenuShown = true
+        } else if (!root.hasMoreTracks && root.allTracksMenuShown) {
+            root.removeMenu(root.allPrimaryTracksMenu)
+            root.allTracksMenuShown = false
+        }
+    }
+    onHasMoreTracksChanged: syncAllTracksMenu()
+    Component.onCompleted: syncAllTracksMenu()
+
+    title: KI18n.i18nc("@title:menu", "&Subtitles")
+
+    Instantiator {
+        model: root.m_mpv.subtitleTracksModel
+        delegate: MenuItem {
+            id: inlineTrack
+
+            required property int index
+            required property int trackId
+            required property string displayText
+
+            visible: inlineTrack.index < root.inlineTrackCount
+            height: visible ? implicitHeight : 0
+            checkable: true
+            checked: inlineTrack.trackId === root.m_mpv.subtitleId
+            enabled: inlineTrack.trackId !== root.m_mpv.secondarySubtitleId || inlineTrack.trackId === 0
+            text: inlineTrack.displayText
+            onTriggered: {
+                root.m_mpv.subtitleId = inlineTrack.trackId === root.m_mpv.subtitleId ? -1 : inlineTrack.trackId
+            }
+        }
+        onObjectAdded: function(index, object) { root.insertItem(index, object) }
+        onObjectRemoved: function(index, object) { root.removeItem(object) }
     }
 
     SubtitleTracksMenu {
