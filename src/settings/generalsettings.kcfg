@@ -21,6 +21,9 @@
       <default>true</default>
     </entry>
     <entry name="Chromeless" type="bool">
+      <default>true</default>
+    </entry>
+    <entry name="ChromelessHintShown" type="bool">
       <default>false</default>
     </entry>
     <entry name="ShowChapterMarkers" type="bool">

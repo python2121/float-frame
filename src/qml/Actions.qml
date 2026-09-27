@@ -358,9 +358,7 @@ Item {
             const mainWindow = root.Window.window as Main
             mainWindow.toggleChromeless()
             if (mainWindow.chromeless) {
-                const shortcut = HarunaApp.actions.toggleChromelessAction.shortcut
-                root.m_osd.message(KI18n.i18nc("@info:tooltip %1 is a keyboard shortcut",
-                                               "Chromeless window: drag to move, drag edges to resize, %1 to restore", shortcut))
+                root.m_osd.message(mainWindow.chromelessHintText())
             }
         }
 

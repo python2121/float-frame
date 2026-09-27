@@ -29,8 +29,9 @@ flatpak run io.github.python2121.FloatFrame --chromeless  # start without any ch
 ```
 
 It installs as its own app (id `io.github.python2121.FloatFrame`, "Float
-Frame" in the launcher) and coexists with Flathub's Haruna. Chromeless mode:
-`Ctrl+Shift+F`, the View menu, or the "Open Chromeless" launcher action.
+Frame" in the launcher) and coexists with Flathub's Haruna. It starts
+chromeless; `Ctrl+Shift+F` (or the hamburger menu → View) brings the window
+frame, menu bar and toolbar back, and the setting is remembered.
 
 The manifest is derived from Flathub's `org.kde.haruna` manifest and builds
 libmpv, mpvqt and friends from source; the first build takes a while, later

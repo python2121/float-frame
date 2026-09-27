@@ -72,7 +72,9 @@ the **window frame** and still being able to move/resize.
 
 **Design.**
 
-- New setting `GeneralSettings.chromeless` (bool) and a new action
+- New setting `GeneralSettings.chromeless` (bool, **default on** — the app's
+  point is the chromeless window; a first-start OSD hint says how to get the
+  frame back, tracked by `chromelessHintShown`) and a new action
   `toggleChromelessAction` (default shortcut `Ctrl+Shift+F`, free upstream). Registered in `actionsmodel.cpp/.h`, handled in
   `Actions.qml`, added to the View menu and the hamburger menu.
 - In `Main.qml`, when chromeless:

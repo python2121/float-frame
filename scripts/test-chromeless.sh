@@ -4,8 +4,9 @@
 # (via a scripting D-Bus call) for the window's frame vs client geometry — equal sizes
 # mean no server-side decoration, i.e. chromeless worked — then close it.
 #
+#   scripts/test-chromeless.sh default               # chromeless is the default: expect frame == client
 #   scripts/test-chromeless.sh flag --chromeless     # expect frame == client
-#   scripts/test-chromeless.sh plain                 # expect frame > client (title bar)
+#   (write Chromeless=false to the sandbox's haruna.conf for a framed run: frame > client)
 #
 # Only the fork is touched: the KWin script matches the test clip's caption and
 # `flatpak kill` targets the fork's app id, so a running Haruna is left alone.

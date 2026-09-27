@@ -262,6 +262,11 @@ ApplicationWindow {
         onIsReadyChanged: {
             osd.active = true
             window.initPlaylist()
+            if (window.chromeless && !GeneralSettings.chromelessHintShown) {
+                osd.message(window.chromelessHintText())
+                GeneralSettings.chromelessHintShown = true
+                GeneralSettings.save()
+            }
         }
 
         Osd {
@@ -534,6 +539,12 @@ ApplicationWindow {
         mpv.stop()
         Models.recentFilesModel.addRecentFile(path, openedFrom)
         playlist.manager.defaultPlaylist.addItem(path, PlaylistModel.Clear)
+    }
+
+    function chromelessHintText() : string {
+        const shortcut = HarunaApp.actions.toggleChromelessAction.shortcut
+        return KI18n.i18nc("@info:tooltip %1 is a keyboard shortcut",
+                           "Chromeless window: drag to move, drag edges to resize, %1 for the window frame and menus", shortcut)
     }
 
     // Turning it on always persists the setting, like Haruna's other view
