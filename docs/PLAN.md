@@ -48,11 +48,13 @@ release tarball.
 - `flatpak/build.sh` runs `org.flatpak.Builder` (installed as a Flatpak), so
   nothing is needed on the host. `flatpak run io.github.python2121.FloatFrame`.
 
-## Phase 0 — baseline (in progress)
+## Phase 0 — baseline (done 2026-09-26)
 
 - [x] Clone upstream, `main` branch, `upstream` remote.
 - [x] Flatpak manifest + build script.
-- [ ] Unmodified master builds and runs as `io.github.python2121.FloatFrame`.
+- [x] Unmodified master (v1.8.1-312-gf727be24) builds and runs as
+  `io.github.python2121.FloatFrame` next to Flathub Haruna. First build ≈ 25 min
+  on the Deck; the haruna module alone rebuilds in a few minutes.
 
 Known wrinkle: the binary still calls itself `org.kde.haruna` (KAboutData
 `setDesktopFileName`, MPRIS name, config dir `~/.config/haruna`), so the Wayland
@@ -96,10 +98,14 @@ the **window frame** and still being able to move/resize.
   `window.startSystemResize(Qt.LeftEdge | Qt.TopEdge …)` on press. Again the
   compositor does the work.
 - Chromeless is orthogonal to fullscreen; fullscreen already hides everything.
-- Toggling `flags` at runtime on Wayland: Qt recreates/reconfigures the
-  xdg surface. If that flickers or loses position, fall back to applying the
-  flag at startup only (setting persisted, takes effect on next launch) and
-  say so in the OSD. **Risk to test first.**
+- Toggling `flags` at runtime on Wayland: **tested** with
+  `docs/spikes/frameless.qml` (run with
+  `flatpak run --socket=wayland --filesystem=home --command=qml org.kde.Sdk//6.11 -platform wayland <abs path> -- --auto`).
+  Flipping `Qt.FramelessWindowHint` four times kept the window visible,
+  Windowed, and at the same geometry — no surface recreation visible from the
+  client side. So a live toggle is fine. Still to eyeball: KWin actually drops
+  the title bar each time, and `startSystemMove`/`startSystemResize` feel
+  (needs a human with a mouse; the spike has both wired up).
 - Startup: `--chromeless` command line flag in `commandlineoptions.cpp` so a
   desktop-file action ("Open chromeless") and KWin rules can target it.
 
@@ -111,9 +117,11 @@ kcfg entry, menu entries.
 Rename so it coexists with Flathub Haruna and is a proper KDE citizen:
 
 - App id `io.github.python2121.FloatFrame`: `KAboutData::setDesktopFileName`,
-  `QApplication::setApplicationName("floatframe")` (moves the config to
-  `~/.config/floatframe`, which also means Float Frame and Haruna do not fight
-  over `harunarc`), MPRIS service name, KDSingleApplication key.
+  `QApplication::setApplicationName("floatframe")`, MPRIS service name,
+  KDSingleApplication key. (Config/DB already live in the sandboxed
+  `~/.var/app/io.github.python2121.FloatFrame/`, so no clash with Haruna's
+  files even before the rename; the clash is only D-Bus names and the
+  Wayland `app_id`.)
 - `data/`: rename desktop file, metainfo, icon (new icon later; reuse
   Haruna's for now — GPL-3.0-or-later, keep the copyright notices).
 - Drop the `rename-*` lines from the manifest once the sources use the new id.
