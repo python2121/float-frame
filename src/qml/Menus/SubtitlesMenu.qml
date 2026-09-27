@@ -34,8 +34,8 @@ Menu {
 
     function syncAllTracksMenu() : void {
         if (root.hasMoreTracks && !root.allTracksMenuShown) {
-            // after the inline items (hidden ones included), before the secondary submenu
-            root.insertMenu(root.m_mpv.subtitleTracksModel.rowCount, root.allPrimaryTracksMenu)
+            // after the five inline rows, before the secondary submenu
+            root.insertMenu(root.inlineTrackCount, root.allPrimaryTracksMenu)
             root.allTracksMenuShown = true
         } else if (!root.hasMoreTracks && root.allTracksMenuShown) {
             root.removeMenu(root.allPrimaryTracksMenu)
@@ -47,28 +47,47 @@ Menu {
 
     title: KI18n.i18nc("@title:menu", "&Subtitles")
 
-    Instantiator {
-        model: root.m_mpv.subtitleTracksModel
-        delegate: MenuItem {
-            id: inlineTrack
-
-            required property int index
-            required property int trackId
-            required property string displayText
-
-            visible: inlineTrack.index < root.inlineTrackCount
-            height: visible ? implicitHeight : 0
-            checkable: true
-            checked: inlineTrack.trackId === root.m_mpv.subtitleId
-            enabled: inlineTrack.trackId !== root.m_mpv.secondarySubtitleId || inlineTrack.trackId === 0
-            text: inlineTrack.displayText
-            onTriggered: {
-                root.m_mpv.subtitleId = inlineTrack.trackId === root.m_mpv.subtitleId ? -1 : inlineTrack.trackId
-            }
+    // Fixed rows bound to the model: dynamic insertion into a Menu reorders
+    // badly when the track list is reset, static items cannot.
+    function trackRole(row: int, role: int) : var {
+        const model = root.m_mpv.subtitleTracksModel
+        if (row >= model.rowCount) {
+            return undefined
         }
-        onObjectAdded: function(index, object) { root.insertItem(index, object) }
-        onObjectRemoved: function(index, object) { root.removeItem(object) }
+        return model.data(model.index(row, 0), role)
     }
+
+    component InlineTrack: MenuItem {
+        id: inlineTrack
+
+        required property int row
+        // re-read when the list changes (new file or external subtitle added)
+        readonly property int trackId: {
+            root.m_mpv.subtitleTracksModel.rowCount; root.m_mpv.currentUrl
+            const id = root.trackRole(row, TracksModel.IdRole)
+            return id === undefined ? -2 : Number(id)
+        }
+
+        visible: inlineTrack.row < root.m_mpv.subtitleTracksModel.rowCount && inlineTrack.row < root.inlineTrackCount
+        height: visible ? implicitHeight : 0
+        checkable: true
+        checked: inlineTrack.trackId === root.m_mpv.subtitleId
+        enabled: inlineTrack.trackId !== root.m_mpv.secondarySubtitleId || inlineTrack.trackId === 0
+        text: {
+            root.m_mpv.subtitleTracksModel.rowCount; root.m_mpv.currentUrl
+            const t = root.trackRole(row, TracksModel.TextRole)
+            return t === undefined ? "" : String(t)
+        }
+        onTriggered: {
+            root.m_mpv.subtitleId = inlineTrack.trackId === root.m_mpv.subtitleId ? -1 : inlineTrack.trackId
+        }
+    }
+
+    InlineTrack { row: 0 }
+    InlineTrack { row: 1 }
+    InlineTrack { row: 2 }
+    InlineTrack { row: 3 }
+    InlineTrack { row: 4 }
 
     SubtitleTracksMenu {
         m_mpv: root.m_mpv
