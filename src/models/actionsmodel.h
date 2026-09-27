@@ -132,6 +132,7 @@ Q_SIGNALS:
     void toggleChromelessAction();
     void cropToContentAction();
     void toggleQuickSettingsAction();
+    void fitWindowToVideoAction();
     void resetCropAction();
     void toggleMenuBarAction();
     void toggleHeaderAction();

@@ -19,6 +19,7 @@ Menu {
     MenuItem { action: HarunaApp.actions.toggleFullscreenAction }
 
     MenuItem { action: HarunaApp.actions.toggleQuickSettingsAction }
+    MenuItem { action: HarunaApp.actions.fitWindowToVideoAction }
     MenuItem {
         action: HarunaApp.actions.toggleChromelessAction
         text: {

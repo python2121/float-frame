@@ -41,6 +41,28 @@ MpvItem {
         return cropRect.width > 0 && cropRect.height > 0
     }
 
+    // display aspect of what is on screen: crop and anamorphic stretch applied,
+    // rotation and an aspect override honoured; 0 when unknown
+    function pictureAspect() : real {
+        const p = getProperty("video-params")
+        if (!p || !p.w || !p.h || !p.dw || !p.dh) {
+            return 0
+        }
+        let aspect = p.dw / p.dh
+        if (hasCrop()) {
+            aspect = (cropRect.width * p.dw / p.w) / (cropRect.height * p.dh / p.h)
+        }
+        const override = Number(getProperty("video-aspect-override"))
+        if (override > 0) {
+            aspect = override
+        }
+        const rotation = Number(getProperty("video-rotate")) || 0
+        if (rotation % 180 !== 0) {
+            aspect = 1 / aspect
+        }
+        return aspect
+    }
+
     function applyCrop(sourceRect: rect) : void {
         const params = getProperty("video-params")
         if (params && params.w && sourceRect.width >= params.w && sourceRect.height >= params.h) {
@@ -183,7 +205,9 @@ MpvItem {
 
             if (leftActionPending && pressed) {
                 const distance = Math.hypot(mouseX - pressPosition.x, mouseY - pressPosition.y)
-                if (distance >= Application.styleHints.startDragDistance) {
+                // 1.3× the platform threshold: a little more travel before a
+                // press becomes a window grab instead of a click (play/pause)
+                if (distance >= Application.styleHints.startDragDistance * 1.3) {
                     leftActionPending = false
                     SystemUtils.startSystemMove(root.window, mouseArea)
                     return

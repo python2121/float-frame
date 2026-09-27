@@ -662,6 +662,14 @@ ActionsModel::ActionsModel(QObject *parent)
     action.description = i18nc("@info", "Video, audio and subtitle controls in a side pane.");
     m_actions << action;
 
+    action.name = u"fitWindowToVideoAction"_s;
+    action.text = i18nc("@action", "Fit Window to Video");
+    action.iconName = u"zoom-fit-best"_s;
+    action.defaultShortcut = Qt::Key_T;
+    action.shortcut = getShortcut(action.name, action.defaultShortcut);
+    action.description = i18nc("@info", "Resize the window so the video area exactly matches the picture's aspect ratio, crop included.");
+    m_actions << action;
+
     action.name = u"resetCropAction"_s;
     action.text = i18nc("@action", "Reset Crop");
     action.iconName = u"edit-undo"_s;

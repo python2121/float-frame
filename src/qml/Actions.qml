@@ -371,6 +371,16 @@ Item {
             root.m_mpv.startCropSelection()
         }
 
+        function onFitWindowToVideoAction() {
+            const mainWindow = root.Window.window as Main
+            if (mainWindow.visibility === Window.Maximized || mainWindow.isFullScreen()) {
+                root.m_osd.message(KI18n.i18nc("@info:tooltip", "Cannot fit the window while maximized or fullscreen"))
+                return
+            }
+            mainWindow.fitWindowToPicture(true)
+            root.m_osd.message(KI18n.i18nc("@info:tooltip", "Window fitted to video"))
+        }
+
         function onResetCropAction() {
             root.m_mpv.resetCrop()
             root.m_osd.message(KI18n.i18nc("@info:tooltip", "Crop reset"))

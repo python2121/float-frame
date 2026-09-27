@@ -77,6 +77,7 @@ Loader {
 
         MenuItem { action: HarunaApp.actions.toggleQuickSettingsAction }
         MenuItem { action: HarunaApp.actions.cropToContentAction }
+        MenuItem { action: HarunaApp.actions.fitWindowToVideoAction }
         MenuItem {
             action: HarunaApp.actions.resetCropAction
             visible: root.m_mpv.hasCrop()

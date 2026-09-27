@@ -264,7 +264,7 @@ ApplicationWindow {
         Timer {
             id: fitWindowTimer
             interval: 150
-            onTriggered: window.fitWindowToPicture()
+            onTriggered: window.fitWindowToPicture(false)
         }
 
         onEofPlayNext: {
@@ -555,29 +555,43 @@ ApplicationWindow {
         playlist.manager.defaultPlaylist.addItem(path, PlaylistModel.Clear)
     }
 
-    // Chromeless: the window *is* the picture. Keep the width, set the height
-    // to the displayed picture's aspect so no black bars remain (crop included).
-    function fitWindowToPicture() : void {
-        if (!chromeless || window.visibility !== Window.Windowed || !mpv.isVideo) {
+    // Size the window so the video area has exactly the displayed picture's
+    // aspect (crop included): no black bars. Automatic in chromeless mode after
+    // every reconfig/crop; on demand (T) in either mode. Keeps the video width,
+    // adds the visible chrome (menu bar, toolbar, docked footer) to the height.
+    function fitWindowToPicture(force: bool) : void {
+        if (!force && !chromeless) {
             return
         }
-        const osd = mpv.getProperty("osd-dimensions")
-        if (!osd || !osd.w || !osd.h) {
+        if (window.visibility !== Window.Windowed || !mpv.isVideo) {
             return
         }
-        const pictureWidth = osd.w - osd.ml - osd.mr
-        const pictureHeight = osd.h - osd.mt - osd.mb
-        if (pictureWidth <= 0 || pictureHeight <= 0) {
-            return
+        let aspect = mpv.pictureAspect()
+        if (aspect <= 0) {
+            const osd = mpv.getProperty("osd-dimensions")
+            if (!osd || !osd.w || !osd.h) {
+                return
+            }
+            const pictureWidth = osd.w - osd.ml - osd.mr
+            const pictureHeight = osd.h - osd.mt - osd.mb
+            if (pictureWidth <= 0 || pictureHeight <= 0) {
+                return
+            }
+            aspect = pictureWidth / pictureHeight
         }
-        const aspect = pictureWidth / pictureHeight
-        let newHeight = Math.round(window.width / aspect)
-        const maxHeight = Screen.desktopAvailableHeight
-        if (newHeight > maxHeight) {
-            newHeight = maxHeight
-            window.width = Math.round(newHeight * aspect)
+        const chromeHeight = (header.visible ? header.height : 0)
+                           + (menuBar.visible ? menuBar.height : 0)
+                           + (footer.isFloating ? 0 : footer.height)
+        const sideWidth = window.width - mpv.width   // panels beside the video
+        let videoWidth = mpv.width
+        let videoHeight = Math.round(videoWidth / aspect)
+        const maxHeight = Screen.desktopAvailableHeight - chromeHeight
+        if (videoHeight > maxHeight) {
+            videoHeight = maxHeight
+            videoWidth = Math.round(videoHeight * aspect)
+            window.width = videoWidth + sideWidth
         }
-        window.height = Math.max(window.minimumHeight, newHeight)
+        window.height = Math.max(window.minimumHeight, videoHeight + chromeHeight)
     }
 
     function chromelessHintText() : string {
