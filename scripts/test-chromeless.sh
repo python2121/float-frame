@@ -12,6 +12,10 @@
 # `flatpak kill` targets the fork's app id, so a running Haruna is left alone.
 set -u
 APP=io.github.python2121.FloatFrame
+if flatpak ps --columns=application 2>/dev/null | grep -q "$APP"; then
+    echo "$APP is already running; refusing (cleanup would close that window too)" >&2
+    exit 3
+fi
 HERE=$(cd "$(dirname "$0")" && pwd)
 CACHE=${XDG_CACHE_HOME:-$HOME/.cache}/float-frame
 CLIP=$CACHE/letterbox-test.mp4

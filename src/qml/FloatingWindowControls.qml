@@ -14,6 +14,7 @@ import org.kde.ki18n
 import org.kde.kirigami as Kirigami
 
 import org.kde.haruna
+import org.kde.haruna.settings
 import org.kde.haruna.utilities
 
 // Chromeless mode: the title bar's essentials as a translucent bar that
@@ -41,12 +42,26 @@ Item {
         }
     }
 
+    // Same rules as the floating footer (Footer.floatingState), top edge
+    // instead of bottom: every mouse movement shows it and it hides 1 s later
+    // unless the pointer is near it; in "edge" trigger mode it only shows while
+    // the pointer is near the top edge.
     function show() : void {
-        hideTimer.stop()
-        root.barState = "visible"
-        // keep it while the pointer is near the top, otherwise fade
-        if (root.m_mpv.mouseY > bar.height * 2) {
-            hideTimer.restart()
+        if (GeneralSettings.floatingFooterTrigger === "EveryMouseMovement") {
+            hideTimer.stop()
+            root.barState = "visible"
+            if (root.m_mpv.mouseY > bar.height * 2) {
+                hideTimer.restart()
+            }
+        } else {
+            if (root.m_mpv.mouseY < bar.height * 2) {
+                if ((root.targetWindow as Main).containsMouse) {
+                    hideTimer.stop()
+                    root.barState = "visible"
+                }
+            } else {
+                hideTimer.restart()
+            }
         }
     }
 
@@ -62,16 +77,27 @@ Item {
     Connections {
         target: HarunaApp
         function onQmlApplicationMouseLeave() {
-            hideTimer.start()
+            hideTimer.stop()
+            leaveHideTimer.restart()
         }
+        function onQmlApplicationMouseEnter() {
+            leaveHideTimer.stop()
+        }
+    }
+
+    // pointer left the window: hide 2 s later regardless of the hover state
+    Timer {
+        id: leaveHideTimer
+        interval: 2000
+        onTriggered: root.barState = "hidden"
     }
 
     Timer {
         id: hideTimer
         interval: 1000
         onTriggered: {
+            // like the footer: stay while hovered, the next mouse move re-arms
             if (bar.hovered) {
-                hideTimer.restart()
                 return
             }
             root.barState = "hidden"

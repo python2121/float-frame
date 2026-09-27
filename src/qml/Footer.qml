@@ -59,8 +59,26 @@ Item {
             target: HarunaApp
             function onQmlApplicationMouseLeave() {
                 if (root.isFloating) {
-                    hideFooterTimer.start()
+                    hideFooterTimer.stop()
+                    leaveHideTimer.restart()
                 }
+            }
+            function onQmlApplicationMouseEnter() {
+                leaveHideTimer.stop()
+            }
+        }
+
+        // Pointer left the window: hide 2 s later no matter what `hovered` says
+        // (it can stay set after a Wayland pointer leave), unless a menu is open.
+        Timer {
+            id: leaveHideTimer
+            interval: 2000
+            onTriggered: {
+                if (hamburgerMenu.isOpen || progressBar.chaptersPopupIsOpen) {
+                    leaveHideTimer.restart()
+                    return
+                }
+                root.footerState = "hidden"
             }
         }
 
