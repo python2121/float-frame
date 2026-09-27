@@ -126,11 +126,8 @@ Item {
         }
 
         function onOpenContextMenuAction() {
-            // if menu is open it will be closed because of the Popup.CloseOnPressOutside close policy
-            // but that happens after the call to openMpvContextMenuLoader() below
-            // resulting in the menu being opened for a very short time and then closed
-            root.m_mpvContextMenuLoader.close()
-            root.m_mpvContextMenuLoader.open()
+            // closes the menu if it is showing, otherwise opens it (see MpvContextMenu.toggle)
+            root.m_mpvContextMenuLoader.toggle()
         }
 
         function onOpenFileAction() {

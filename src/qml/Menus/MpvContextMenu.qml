@@ -35,11 +35,32 @@ Loader {
         root.active = false
     }
 
+    // Right-click while the menu is showing closes it instead of reopening it
+    // at the new position. Depending on the style, the press outside may already
+    // have started closing the menu (exit transition running) or just closed it,
+    // so both count as "showing".
+    function toggle() : void {
+        const menu = root.item as Menu
+        const isShowing = root.active && menu !== null && menu.visible
+        const justClosed = Date.now() - root.closedAt < 200
+        if (isShowing || justClosed) {
+            root.close()
+            return
+        }
+        root.open()
+    }
+
+    // Date.now() of the last close, see toggle()
+    property double closedAt: 0
+
     active: false
     asynchronous: true
     sourceComponent: Menu {
 
-        onClosed: root.active = false
+        onClosed: {
+            root.closedAt = Date.now()
+            root.active = false
+        }
 
         MenuItem { action: HarunaApp.actions.playPauseAction }
         MenuItem { action: HarunaApp.actions.playNextAction }
