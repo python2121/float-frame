@@ -16,7 +16,8 @@ import org.kde.kirigami as Kirigami
 import org.kde.haruna
 
 // Cold start with nothing to play: an Open button and the last few files.
-// Goes away as soon as something loads, on Escape, or on a click outside.
+// Goes away as soon as something loads, on Escape, or via its close button
+// (not on a click outside: resizing or moving the window would dismiss it).
 Popup {
     id: root
 
@@ -25,7 +26,7 @@ Popup {
 
     modal: false
     dim: false
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+    closePolicy: Popup.CloseOnEscape
     anchors.centerIn: Overlay.overlay
     padding: Kirigami.Units.largeSpacing * 2
     width: Math.min(Kirigami.Units.gridUnit * 26, (Overlay.overlay?.width ?? 600) - Kirigami.Units.largeSpacing * 4)
@@ -35,6 +36,16 @@ Popup {
         radius: Kirigami.Units.cornerRadius
         border.color: Qt.alpha(Kirigami.Theme.textColor, 0.15)
         border.width: 1
+    }
+
+    // the KDE desktop style paints button text itself, so shorten long names
+    // here instead of eliding inside a custom content item
+    function shortened(name: string, maxLength: int) : string {
+        if (name.length <= maxLength) {
+            return name
+        }
+        const keep = Math.floor((maxLength - 1) / 2)
+        return name.substring(0, keep) + "…" + name.substring(name.length - keep)
     }
 
     function showIfIdle() : void {
@@ -67,6 +78,13 @@ Popup {
                 text: KI18n.i18nc("@title", "Float Frame")
                 level: 2
                 Layout.fillWidth: true
+            }
+            ToolButton {
+                icon.name: "window-close"
+                focusPolicy: Qt.NoFocus
+                ToolTip.text: KI18n.i18nc("@info:tooltip", "Close")
+                ToolTip.visible: hovered
+                onClicked: root.close()
             }
         }
 
@@ -104,22 +122,9 @@ Popup {
                 visible: recentDelegate.index < root.maxRecent
                 flat: true
                 icon.name: "video-x-generic"
-                text: recentDelegate.filename
+                text: root.shortened(recentDelegate.filename, 44)
                 display: AbstractButton.TextBesideIcon
                 Layout.fillWidth: true
-                contentItem: RowLayout {
-                    spacing: Kirigami.Units.smallSpacing
-                    Kirigami.Icon {
-                        source: recentDelegate.icon.name
-                        Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                        Layout.preferredHeight: Kirigami.Units.iconSizes.small
-                    }
-                    Label {
-                        text: recentDelegate.text
-                        elide: Text.ElideMiddle
-                        Layout.fillWidth: true
-                    }
-                }
                 ToolTip.text: recentDelegate.toolTipText
                 ToolTip.visible: hovered && recentDelegate.toolTipText !== ""
                 ToolTip.delay: Kirigami.Units.toolTipDelay
