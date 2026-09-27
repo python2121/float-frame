@@ -20,6 +20,9 @@
     <entry name="ShowHeader" type="bool">
       <default>true</default>
     </entry>
+    <entry name="Chromeless" type="bool">
+      <default>false</default>
+    </entry>
     <entry name="ShowChapterMarkers" type="bool">
       <default>true</default>
     </entry>

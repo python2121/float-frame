@@ -28,7 +28,8 @@ Item {
 
     property alias progressBar: progressBar
     property string footerState: isFloating ? "hidden" : "visible"
-    property bool isFloating: GeneralSettings.footerStyle === "floating"
+    readonly property bool windowIsChromeless: (Window.window as Main)?.chromeless ?? false
+    property bool isFloating: GeneralSettings.footerStyle === "floating" || windowIsChromeless
     property bool isSmallSize: width < 600
     property int buttonSize: isSmallSize ? Kirigami.Units.iconSizes.small : Kirigami.Units.iconSizes.smallMedium
 

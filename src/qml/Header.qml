@@ -28,7 +28,7 @@ ToolBar {
     position: ToolBar.Header
     state: {
         const mainWindow = Window.window as Main
-        if (!mainWindow.isFullScreen() && GeneralSettings.showHeader) {
+        if (!mainWindow.isFullScreen() && !mainWindow.chromeless && GeneralSettings.showHeader) {
             return "visible"
         } else {
             return "hidden"

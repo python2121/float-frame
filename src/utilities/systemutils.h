@@ -25,6 +25,12 @@ public:
     Q_INVOKABLE static bool openHana(const QUrl &url);
     Q_INVOKABLE static bool isMediaInfoInstalled();
     Q_INVOKABLE static bool openMediaInfo(const QUrl &url);
+    // Ask the window system to start an interactive move/resize of a frameless
+    // window (xdg_toplevel move/resize on Wayland). QWindow has these but they
+    // are not Q_INVOKABLE, so QML cannot call them directly. Takes a QObject so
+    // any QML Window converts; `edges` is a Qt.Edges combination.
+    Q_INVOKABLE static bool startSystemMove(QObject *window);
+    Q_INVOKABLE static bool startSystemResize(QObject *window, int edges);
 };
 
 #endif // SYSTEMUTILS_H

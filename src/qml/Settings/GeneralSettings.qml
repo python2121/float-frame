@@ -359,6 +359,19 @@ SettingsBasePage {
 
         Item { Layout.preferredWidth: 1 }
 
+        CheckBox {
+            text: KI18n.i18nc("@option:check", "Chromeless window (no frame, menu bar, toolbar or docked footer)")
+            checked: GeneralSettings.chromeless || HarunaApp.chromelessOverride
+            onClicked: {
+                // the action handles the saved setting and the --chromeless override
+                if (checked !== (GeneralSettings.chromeless || HarunaApp.chromelessOverride)) {
+                    HarunaApp.actions.toggleChromelessAction.trigger()
+                }
+            }
+        }
+
+        Item { Layout.preferredWidth: 1 }
+
         RowLayout {
             CheckBox {
                 text: KI18n.i18nc("@option:check", "Show explanatory tooltips")

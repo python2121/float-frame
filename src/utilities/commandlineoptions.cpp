@@ -40,7 +40,12 @@ CommandLineOptions::CommandLineOptions(QObject *parent)
                                                  QString());
     m_parser->addOption(ytdlFormatSelectionOption);
 
+    QCommandLineOption chromelessOption(u"chromeless"_s,
+                                        i18nc("@info:shell", "Start with a frameless window without menu bar, toolbar or docked footer"));
+    m_parser->addOption(chromelessOption);
+
     m_parser->process(*QApplication::instance());
+    m_chromeless = m_parser->isSet(chromelessOption);
     const auto args = m_parser->positionalArguments();
     for (const auto &arg : args) {
         m_startupUrls.append(QUrl::fromUserInput(arg, QDir::currentPath()));
@@ -50,6 +55,11 @@ CommandLineOptions::CommandLineOptions(QObject *parent)
 std::shared_ptr<QCommandLineParser> CommandLineOptions::parser() const
 {
     return m_parser;
+}
+
+bool CommandLineOptions::chromeless() const
+{
+    return m_chromeless;
 }
 
 QList<QUrl> CommandLineOptions::startupUrls() const

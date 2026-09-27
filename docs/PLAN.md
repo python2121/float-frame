@@ -62,7 +62,7 @@ Known wrinkle: the binary still calls itself `org.kde.haruna` (KAboutData
 KWin falls back to the Flatpak id from `/.flatpak-info` for icon/task-manager
 matching, so this works but is not clean — fixed in Phase 2.
 
-## Phase 1 — chromeless mode
+## Phase 1 — chromeless mode (done 2026-09-26; manual drag/resize check pending)
 
 **What exists already.** Haruna can hide the header (`GeneralSettings.showHeader`)
 and menu bar (`showMenuBar`) and has a floating footer (`footerStyle = "floating"`,
@@ -73,8 +73,7 @@ the **window frame** and still being able to move/resize.
 **Design.**
 
 - New setting `GeneralSettings.chromeless` (bool) and a new action
-  `toggleChromelessAction` (default shortcut: `Ctrl+Shift+F`? — pick something
-  not in `actionsmodel.cpp`). Registered in `actionsmodel.cpp/.h`, handled in
+  `toggleChromelessAction` (default shortcut `Ctrl+Shift+F`, free upstream). Registered in `actionsmodel.cpp/.h`, handled in
   `Actions.qml`, added to the View menu and the hamburger menu.
 - In `Main.qml`, when chromeless:
   - `flags: Qt.Window | Qt.FramelessWindowHint`. On Wayland this tells KWin via
@@ -109,8 +108,15 @@ the **window frame** and still being able to move/resize.
 - Startup: `--chromeless` command line flag in `commandlineoptions.cpp` so a
   desktop-file action ("Open chromeless") and KWin rules can target it.
 
-**Estimate:** small. ~150 lines QML, ~30 lines C++ (action + setting), one
-kcfg entry, menu entries.
+**Status.** Implemented as designed. Automated check: `scripts/test-chromeless.sh`
+launches the flatpak and asks KWin for frame vs client geometry (equal ⇒ no
+decoration); passes for `--chromeless`, for the saved setting, and shows the
+29 px title bar for a plain launch. `--chromeless` is a session-only override
+(`HarunaApp.chromelessOverride`) and does not leak into the config. Still needs
+a human: drag-to-move feel, edge/corner resize, live toggle with Ctrl+Shift+F.
+
+Extra: right-click while the context menu is showing now closes it instead of
+reopening it at the pointer (`MpvContextMenu.toggle()`).
 
 ## Phase 2 — make it its own app
 
@@ -152,7 +158,7 @@ scale from displayed size to `video-params/w,h` (storage size), which is what
 
 **UI.**
 
-- Action `cropToContentAction` (default `C`?) → pauses, enters *crop mode*: a
+- Action `cropToContentAction`, default shortcut **`C`** (user’s choice; unused upstream) → pauses, enters *crop mode*: a
   dimmed overlay over `MpvVideo` with a `DragHandler`; drag draws a rectangle,
   handles on the corners/edges to adjust, Enter/double-click applies, Esc
   cancels. Action `resetCropAction` clears it. Both in the Video menu, the
@@ -202,7 +208,7 @@ observed properties ~80 lines C++ in `mpvitem.cpp`; persistence ~60 lines.
 
 ## Open questions
 
-- Default shortcuts for the new actions (must not collide with
+- Default shortcut for chromeless: `Ctrl+Shift+F` (free upstream). Crop: `C`, decided. Remaining new actions (must not collide with
   `actionsmodel.cpp` defaults; upstream uses most single letters).
 - Should the crop also drive `--video-zoom`/`--video-pan` instead of
   `video-crop`? `video-crop` is cleaner (subtitles reposition, screenshots

@@ -19,6 +19,17 @@ Menu {
     MenuItem { action: HarunaApp.actions.toggleFullscreenAction }
 
     MenuItem {
+        action: HarunaApp.actions.toggleChromelessAction
+        text: {
+            const mainWindow = Window.window as Main
+            if (mainWindow?.chromeless) {
+                return KI18n.i18nc("@action:inmenu", "Show Window Frame")
+            } else {
+                return KI18n.i18nc("@action:inmenu", "Chromeless Window")
+            }
+        }
+    }
+    MenuItem {
         action: HarunaApp.actions.toggleMenuBarAction
         text: {
             const mainWindow = Window.window as Main

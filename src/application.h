@@ -51,6 +51,13 @@ public:
     Q_PROPERTY(QQmlPropertyMap *actions MEMBER m_actions CONSTANT)
     Q_PROPERTY(bool actionsEnabled READ actionsEnabled WRITE setActionsEnabled NOTIFY actionsEnabledChanged)
     bool actionsEnabled();
+
+    // Float Frame: --chromeless makes the window chromeless for this session
+    // without touching the saved setting; cleared when the user toggles it off.
+    Q_PROPERTY(bool chromelessOverride READ chromelessOverride WRITE setChromelessOverride NOTIFY chromelessOverrideChanged FINAL)
+    bool chromelessOverride() const;
+    void setChromelessOverride(bool value);
+    Q_SIGNAL void chromelessOverrideChanged();
     void setActionsEnabled(bool enable);
 
     Q_PROPERTY(bool isAltKeyPressed READ isAltKeyPressed WRITE setIsAltKeyPressed NOTIFY isAltKeyPressedChanged FINAL)
@@ -104,6 +111,7 @@ private:
     std::unique_ptr<ApplicationEventFilter> m_appEventFilter;
     QQmlPropertyMap *m_actions{new QQmlPropertyMap};
     bool m_actionsEnabled{true};
+    bool m_chromelessOverride{false};
     bool m_isAltKeyPressed;
 };
 

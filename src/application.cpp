@@ -101,6 +101,8 @@ Application::Application()
 
     KLocalizedString::setApplicationDomain("haruna");
 
+    m_chromelessOverride = CommandLineOptions::instance().chromeless();
+
     setupWorkerThread();
     setupAboutData();
 
@@ -110,6 +112,20 @@ Application::Application()
 }
 
 Application::~Application() = default;
+
+bool Application::chromelessOverride() const
+{
+    return m_chromelessOverride;
+}
+
+void Application::setChromelessOverride(bool value)
+{
+    if (value == m_chromelessOverride) {
+        return;
+    }
+    m_chromelessOverride = value;
+    Q_EMIT chromelessOverrideChanged();
+}
 
 bool Application::actionsEnabled()
 {

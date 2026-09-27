@@ -8,6 +8,7 @@
 
 #include <QFontDatabase>
 #include <QGuiApplication>
+#include <QWindow>
 
 #include <KIO/ApplicationLauncherJob>
 #include <KService>
@@ -93,4 +94,22 @@ bool SystemUtils::openMediaInfo(const QUrl &url)
     }
 
     return false;
+}
+
+bool SystemUtils::startSystemMove(QObject *window)
+{
+    auto *qWindow = qobject_cast<QWindow *>(window);
+    if (qWindow == nullptr) {
+        return false;
+    }
+    return qWindow->startSystemMove();
+}
+
+bool SystemUtils::startSystemResize(QObject *window, int edges)
+{
+    auto *qWindow = qobject_cast<QWindow *>(window);
+    if (qWindow == nullptr || edges == 0) {
+        return false;
+    }
+    return qWindow->startSystemResize(Qt::Edges::fromInt(edges));
 }

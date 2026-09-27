@@ -26,6 +26,9 @@ public:
     static CommandLineOptions *create(QQmlEngine *, QJSEngine *);
 
     Q_PROPERTY(QList<QUrl> startupUrls READ startupUrls WRITE setStartupUrls NOTIFY startupUrlsChanged FINAL)
+    // --chromeless: start with the frameless, chrome-free window (Float Frame)
+    Q_PROPERTY(bool chromeless READ chromeless CONSTANT FINAL)
+    bool chromeless() const;
     Q_SIGNAL void startupUrlsChanged();
     QList<QUrl> startupUrls() const;
     void setStartupUrls(const QList<QUrl> &newStartupUrls);
@@ -35,6 +38,7 @@ public:
 private:
     explicit CommandLineOptions(QObject *parent = nullptr);
     QList<QUrl> m_startupUrls;
+    bool m_chromeless{false};
     std::shared_ptr<QCommandLineParser> m_parser;
 };
 

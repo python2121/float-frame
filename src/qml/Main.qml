@@ -27,6 +27,11 @@ ApplicationWindow {
 
     property bool containsMouse: false
 
+    // Float Frame: frameless window with no menu bar, toolbar or docked footer;
+    // the video is dragged to move the window and its edges to resize it.
+    // Either the saved setting or the --chromeless session override turns it on.
+    readonly property bool chromeless: GeneralSettings.chromeless || HarunaApp.chromelessOverride
+
     property int previousVisibility: Window.Windowed
     property var acceptedSubtitleTypes: ["application/x-subrip", "text/x-ssa", "text/x-microdvd"]
 
@@ -48,7 +53,8 @@ ApplicationWindow {
     height: 600
     minimumWidth: 400
     minimumHeight: 200
-    color: Kirigami.Theme.backgroundColor
+    flags: chromeless ? (Qt.Window | Qt.FramelessWindowHint) : Qt.Window
+    color: chromeless ? "black" : Kirigami.Theme.backgroundColor
 
     onVisibilityChanged: function(visibility) {
         if (PlaybackSettings.pauseWhileMinimized) {
@@ -271,6 +277,14 @@ ApplicationWindow {
                 HarunaApp.actions[actionName].trigger()
             }
         }
+    }
+
+    // Declared right after the video so the grab zones sit above it but below
+    // the playlist, transcript and footer, which keep their own edge pixels.
+    WindowResizeHandles {
+        targetWindow: window
+        anchors.fill: parent
+        visible: window.chromeless && window.visibility === Window.Windowed
     }
 
     // extra space outside the playlist so that the playlist is not closed
@@ -520,6 +534,18 @@ ApplicationWindow {
         mpv.stop()
         Models.recentFilesModel.addRecentFile(path, openedFrom)
         playlist.manager.defaultPlaylist.addItem(path, PlaylistModel.Clear)
+    }
+
+    // Turning it on always persists the setting, like Haruna's other view
+    // toggles; turning it off also clears the --chromeless session override.
+    function toggleChromeless() : void {
+        if (chromeless) {
+            HarunaApp.chromelessOverride = false
+            GeneralSettings.chromeless = false
+        } else {
+            GeneralSettings.chromeless = true
+        }
+        GeneralSettings.save()
     }
 
     function isFullScreen() : bool {

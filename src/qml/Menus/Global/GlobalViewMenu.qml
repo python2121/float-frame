@@ -36,6 +36,19 @@ Labs.Menu {
     }
 
     Labs.MenuItem {
+        icon.name: HarunaApp.actions.toggleChromelessAction.icon.name
+        text: {
+            const mainWindow = Window.window as Main
+            if (mainWindow?.chromeless) {
+                return KI18n.i18nc("@action:inmenu", "Show Window Frame")
+            } else {
+                return KI18n.i18nc("@action:inmenu", "Chromeless Window")
+            }
+        }
+        onTriggered: HarunaApp.actions.toggleChromelessAction.trigger()
+    }
+
+    Labs.MenuItem {
         icon.name: HarunaApp.actions.toggleHeaderAction.icon.name
         text: {
             const mainWindow = Window.window as Main

@@ -19,6 +19,7 @@
 #include <KDSingleApplication>
 
 #include "application.h"
+#include "commandlineoptions.h"
 #include "generalsettings.h"
 #include "thumbnailimageprovider.h"
 
@@ -74,10 +75,11 @@ int main(int argc, char *argv[])
         });
     } else {
         if (GeneralSettings::useSingleInstance()) {
-            QCommandLineParser clParser;
-            clParser.process(qApplication);
-            if (!clParser.positionalArguments().isEmpty()) {
-                const QString file = clParser.positionalArguments().constFirst();
+            // the shared parser knows all options; a bare QCommandLineParser would
+            // reject --chromeless / --ytdl-format-selection as unknown and exit
+            const QStringList positionalArguments = CommandLineOptions::instance().parser()->positionalArguments();
+            if (!positionalArguments.isEmpty()) {
+                const QString file = positionalArguments.constFirst();
                 const QString token = qEnvironmentVariable("XDG_ACTIVATION_TOKEN");
 
                 QByteArray byteArray;

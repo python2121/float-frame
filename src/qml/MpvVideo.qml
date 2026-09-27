@@ -67,6 +67,22 @@ MpvItem {
         id: mouseArea
 
         property bool hideCursor: false
+        // Chromeless window: a left press may become a window drag, so its
+        // mouse action is deferred to the release and dropped if a drag starts.
+        property bool leftActionPending: false
+        property point pressPosition
+        property int pressModifiers: Qt.NoModifier
+
+        function canDragWindow() : bool {
+            return root.window.chromeless === true && !root.window.isFullScreen()
+        }
+
+        function triggerMouseAction(button: int, modifiers: int, isDoubleClick: bool) : void {
+            const actionName = Models.mouseActionsModel.getAction(button, modifiers, isDoubleClick)
+            if (actionName) {
+                HarunaApp.actions[actionName].trigger()
+            }
+        }
 
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton | Qt.ForwardButton | Qt.BackButton
         anchors.fill: parent
@@ -78,6 +94,15 @@ MpvItem {
 
             hideCursor = false
             hideCursorTimer.restart()
+
+            if (leftActionPending && pressed) {
+                const distance = Math.hypot(mouseX - pressPosition.x, mouseY - pressPosition.y)
+                if (distance >= Application.styleHints.startDragDistance) {
+                    leftActionPending = false
+                    SystemUtils.startSystemMove(root.window)
+                    return
+                }
+            }
 
             if (!PlaylistSettings.canToggleWithMouse) {
                 return
@@ -114,46 +139,29 @@ MpvItem {
 
         onPressed: function(mouse) {
             focus = true
-            const model = Models.mouseActionsModel
-            let actionName
-            let modifier = mouse.modifiers
-            if (mouse.button === Qt.LeftButton) {
-                actionName = model.getAction(Qt.LeftButton, modifier)
-            } else if (mouse.button === Qt.MiddleButton) {
-                actionName = model.getAction(Qt.MiddleButton, modifier)
-            } else if (mouse.button === Qt.RightButton) {
-                actionName = model.getAction(Qt.RightButton, modifier)
-            } else if (mouse.button === Qt.ForwardButton) {
-                actionName = model.getAction(Qt.ForwardButton, modifier)
-            } else if (mouse.button === Qt.BackButton) {
-                actionName = model.getAction(Qt.BackButton, modifier)
+            if (mouse.button === Qt.LeftButton && canDragWindow()) {
+                leftActionPending = true
+                pressPosition = Qt.point(mouse.x, mouse.y)
+                pressModifiers = mouse.modifiers
+                return
             }
+            triggerMouseAction(mouse.button, mouse.modifiers, false)
+        }
 
-            if (actionName) {
-                HarunaApp.actions[actionName].trigger()
+        onReleased: function(mouse) {
+            if (leftActionPending && mouse.button === Qt.LeftButton) {
+                leftActionPending = false
+                triggerMouseAction(mouse.button, pressModifiers, false)
             }
+        }
+
+        onCanceled: {
+            leftActionPending = false
         }
 
         onDoubleClicked: function(mouse) {
             focus = true
-            const model = Models.mouseActionsModel
-            let actionName
-            let modifier = mouse.modifiers
-            if (mouse.button === Qt.LeftButton) {
-                actionName = model.getAction(Qt.LeftButton, modifier, true)
-            } else if (mouse.button === Qt.MiddleButton) {
-                actionName = model.getAction(Qt.MiddleButton, modifier, true)
-            } else if (mouse.button === Qt.RightButton) {
-                actionName = model.getAction(Qt.RightButton, modifier, true)
-            } else if (mouse.button === Qt.ForwardButton) {
-                actionName = model.getAction(Qt.ForwardButton, modifier, true)
-            } else if (mouse.button === Qt.BackButton) {
-                actionName = model.getAction(Qt.BackButton, modifier, true)
-            }
-
-            if (actionName) {
-                HarunaApp.actions[actionName].trigger()
-            }
+            triggerMouseAction(mouse.button, mouse.modifiers, true)
         }
     }
 
