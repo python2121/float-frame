@@ -102,6 +102,10 @@ Item {
 
         function onExitFullscreenAction() {
             const mainWindow = root.Window.window as Main
+            // Escape closes the Quick Settings pane first, if it is open
+            if (mainWindow.closeQuickSettings()) {
+                return
+            }
             mainWindow.exitFullscreen()
         }
 

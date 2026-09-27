@@ -449,6 +449,12 @@ ApplicationWindow {
         m_mpv: mpv
     }
 
+    StartupPopup {
+        id: startupPopup
+
+        m_mpv: mpv
+    }
+
     Connections {
         target: HarunaApp
         function onQmlApplicationMouseLeave() {
@@ -547,6 +553,11 @@ ApplicationWindow {
         if (GeneralSettings.fullscreenOnStartUp && hasFileToOpen) {
             toggleFullScreen()
         }
+        if (!hasCommandLineFile) {
+            // nothing asked for on the command line: offer Open and the recent files
+            // (closes itself if the last played file gets restored)
+            Qt.callLater(startupPopup.showIfIdle)
+        }
     }
 
     function openFile(path: string, openedFrom: int) : void {
@@ -592,6 +603,14 @@ ApplicationWindow {
             window.width = videoWidth + sideWidth
         }
         window.height = Math.max(window.minimumHeight, videoHeight + chromeHeight)
+    }
+
+    function closeQuickSettings() : bool {
+        if (quickSettings.state === "visible") {
+            quickSettings.state = "hidden"
+            return true
+        }
+        return false
     }
 
     function chromelessHintText() : string {

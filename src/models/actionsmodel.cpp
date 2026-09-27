@@ -503,7 +503,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"volumeUpAction"_s;
     action.text = i18nc("@action", "Volume Up");
     action.iconName = u"audio-volume-high"_s;
-    action.defaultShortcut = Qt::Key_9;
+    action.defaultShortcut = Qt::Key_0;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -511,7 +511,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"volumeDownAction"_s;
     action.text = i18nc("@action", "Volume Down");
     action.iconName = u"audio-volume-low"_s;
-    action.defaultShortcut = Qt::Key_0;
+    action.defaultShortcut = Qt::Key_9;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -543,7 +543,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"contrastUpAction"_s;
     action.text = i18nc("@action", "Increase Contrast");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_1;
+    action.defaultShortcut = Qt::Key_2;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -551,7 +551,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"contrastDownAction"_s;
     action.text = i18nc("@action", "Decrease Contrast");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_2;
+    action.defaultShortcut = Qt::Key_1;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -567,7 +567,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"brightnessUpAction"_s;
     action.text = i18nc("@action", "Increase Brightness");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_3;
+    action.defaultShortcut = Qt::Key_4;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -575,7 +575,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"brightnessDownAction"_s;
     action.text = i18nc("@action", "Decrease Brightness");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_4;
+    action.defaultShortcut = Qt::Key_3;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -591,7 +591,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"gammaUpAction"_s;
     action.text = i18nc("@action", "Increase Gamma");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_5;
+    action.defaultShortcut = Qt::Key_6;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -599,7 +599,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"gammaDownAction"_s;
     action.text = i18nc("@action", "Decrease Gamma");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_6;
+    action.defaultShortcut = Qt::Key_5;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -615,7 +615,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"saturationUpAction"_s;
     action.text = i18nc("@action", "Increase Saturation");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_7;
+    action.defaultShortcut = Qt::Key_8;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;
@@ -623,7 +623,7 @@ ActionsModel::ActionsModel(QObject *parent)
     action.name = u"saturationDownAction"_s;
     action.text = i18nc("@action", "Decrease Saturation");
     action.iconName = u"contrast"_s;
-    action.defaultShortcut = Qt::Key_8;
+    action.defaultShortcut = Qt::Key_7;
     action.shortcut = getShortcut(action.name, action.defaultShortcut);
     action.description = QString{};
     m_actions << action;

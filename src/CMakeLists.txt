@@ -110,6 +110,7 @@ qt_add_qml_module(haruna
         qml/MpvVideo.qml
         qml/Osd.qml
         qml/QuickSettings.qml
+        qml/StartupPopup.qml
         qml/VolumeSlider.qml
         qml/WindowResizeHandles.qml
         qml/Main.qml
