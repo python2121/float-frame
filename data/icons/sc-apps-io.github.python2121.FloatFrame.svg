@@ -1,19 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="button" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4fb9ee"/>
-      <stop offset="1" stop-color="#1d7fd6"/>
-    </linearGradient>
-    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.28"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-    <clipPath id="buttonClip">
-      <rect x="4" y="4" width="56" height="56" rx="14"/>
-    </clipPath>
-  </defs>
-  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#button)"/>
-  <rect x="4" y="4" width="56" height="26" clip-path="url(#buttonClip)" fill="url(#gloss)"/>
-  <rect x="4.5" y="4.5" width="55" height="55" rx="13.5" fill="none" stroke="#ffffff" stroke-opacity="0.35"/>
-  <path d="M25 18v28l22-14z" fill="#fcfcfc" stroke="#fcfcfc" stroke-width="3" stroke-linejoin="round"/>
+  <!-- flat play button: Breeze blue, no gradient, gloss or shadow -->
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#3daee9"/>
+  <path d="M25 18v28l22-14z" fill="#ffffff" stroke="#ffffff" stroke-width="3" stroke-linejoin="round"/>
 </svg>
