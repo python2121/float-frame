@@ -55,6 +55,11 @@ public:
     // Float Frame: --chromeless makes the window chromeless for this session
     // without touching the saved setting; cleared when the user toggles it off.
     Q_PROPERTY(bool chromelessOverride READ chromelessOverride WRITE setChromelessOverride NOTIFY chromelessOverrideChanged FINAL)
+
+    // FLOATFRAME_STARTUP_TRACE=1: components log "FF-T <name> <ms since epoch>" while starting
+    Q_PROPERTY(bool startupTrace READ startupTrace CONSTANT FINAL)
+    bool startupTrace() const;
+    Q_INVOKABLE void trace(const QString &name) const;
     bool chromelessOverride() const;
     void setChromelessOverride(bool value);
     Q_SIGNAL void chromelessOverrideChanged();

@@ -8,6 +8,7 @@
 
 #include <QAbstractItemModel>
 #include <QApplication>
+#include <QDateTime>
 #include <QCommandLineParser>
 #include <QDesktopServices>
 #include <QDir>
@@ -112,6 +113,19 @@ Application::Application()
 }
 
 Application::~Application() = default;
+
+bool Application::startupTrace() const
+{
+    static const bool enabled = qEnvironmentVariableIsSet("FLOATFRAME_STARTUP_TRACE");
+    return enabled;
+}
+
+void Application::trace(const QString &name) const
+{
+    if (startupTrace()) {
+        fprintf(stderr, "FF-T %s %lld\n", qPrintable(name), static_cast<long long>(QDateTime::currentMSecsSinceEpoch()));
+    }
+}
 
 bool Application::chromelessOverride() const
 {

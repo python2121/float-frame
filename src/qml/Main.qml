@@ -249,6 +249,7 @@ ApplicationWindow {
         }
 
         onVideoReconfig: {
+            HarunaApp.trace("video-reconfig")
             window.resizeWindow()
             fitWindowTimer.restart()
         }
@@ -276,6 +277,7 @@ ApplicationWindow {
         }
 
         onIsReadyChanged: {
+            HarunaApp.trace("mpv-ready")
             osd.active = true
             window.initPlaylist()
             if (window.chromeless && !GeneralSettings.chromelessHintShown) {
@@ -381,18 +383,33 @@ ApplicationWindow {
         anchors.top: window.contentItem.top
     }
 
-    QuickSettings {
-        id: quickSettings
+    // Built off the startup path: the pane (three tabs, ~40 controls) is
+    // created asynchronously once the window is up; opening it before that
+    // finishes forces completion on the spot.
+    Loader {
+        id: quickSettingsLoader
 
-        m_mpv: mpv
-        height: mpv.height
-        mainWindowWidth: window.width
-        fsScale: 1
+        active: true
+        asynchronous: true
+        sourceComponent: QuickSettings {
+            m_mpv: mpv
+            height: mpv.height
+            mainWindowWidth: window.width
+            fsScale: 1
+        }
+        onLoaded: HarunaApp.trace("quicksettings-loaded")
+
+        function pane() : QuickSettings {
+            if (status !== Loader.Ready) {
+                asynchronous = false   // completes the pending load synchronously
+            }
+            return item as QuickSettings
+        }
 
         Connections {
             target: actions
             function onToggleQuickSettings() {
-                quickSettings.toggle()
+                quickSettingsLoader.pane()?.toggle()
             }
         }
     }
@@ -544,6 +561,7 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        HarunaApp.trace("main-completed")
         HarunaApp.setupEventFilter(window)
         HarunaApp.activateColorScheme(GeneralSettings.colorScheme)
 
@@ -606,8 +624,9 @@ ApplicationWindow {
     }
 
     function closeQuickSettings() : bool {
-        if (quickSettings.state === "visible") {
-            quickSettings.state = "hidden"
+        const pane = quickSettingsLoader.item as QuickSettings
+        if (pane && pane.state === "visible") {
+            pane.state = "hidden"
             return true
         }
         return false

@@ -252,6 +252,30 @@ the picture. Auto-detect (cropdetect) and per-file persistence: not done.
   on `main`; conflicts should be limited to `Main.qml`, `MpvVideo.qml`,
   `actionsmodel.cpp`, `generalsettings.kcfg`.
 
+
+## Performance notes (2026-09-27, Steam Deck, KDE Wayland)
+
+Measured on the installed flatpak; tooling: `scripts/perf.sh` (startup, CPU,
+RSS while playing/paused via MPRIS) and `FLOATFRAME_STARTUP_TRACE=1`
+(timestamps on stderr: qapplication, engine-load, main-completed, mpv-ready,
+video-reconfig, quicksettings-loaded).
+
+- Playback (1080p H.264 High, 23.976 fps): 6.8 % of one core, GPU 7 % busy,
+  VCN clock raised → VA-API hardware decode with zero-copy EGL interop
+  (`hwdec=auto` == `auto-safe`; libmpv links libva-drm/-wayland, EGL). Audio
+  goes to PipeWire directly. RSS ≈ 665 MB, mostly mpv's default demuxer cache.
+- Renderer: `vo=libmpv` offers only the OpenGL `gpu` backend in mpv 0.41
+  (`video/out/vo_libmpv.c`, `gpu/libmpv_gpu.c`); gpu-next is not reachable
+  through the render API, so there is no renderer upgrade for an embedder.
+- Startup: sandbox 0.13 s; Qt/KDE init ≈ 0.25 s; QML load was ≈ 0.8 s with
+  the Quick Settings pane built eagerly (stock Haruna: ≈ 0.35 s). Loading the
+  pane through an asynchronous Loader brought launch→window from 1.22 s to
+  0.63–0.75 s (stock Haruna 0.62 s). The pane then finishes in idle time
+  ≈ 2.9 s after launch; pressing P earlier forces it synchronously (one-time
+  ≈ 0.5 s). The font scan is negligible (6 ms).
+- Idle: no repeating timers in chromeless mode. Upstream's docked footer
+  polls every 50 ms (framed mode only) — candidate for an event-driven fix.
+
 ## Open questions
 
 - Default shortcut for chromeless: `Ctrl+Shift+F` (free upstream). Crop: `C`, decided. Remaining new actions (must not collide with

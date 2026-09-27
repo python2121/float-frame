@@ -18,6 +18,8 @@
 
 #include <KDSingleApplication>
 
+#include <QDateTime>
+
 #include "application.h"
 #include "commandlineoptions.h"
 #include "generalsettings.h"
@@ -51,6 +53,9 @@ int main(int argc, char *argv[])
     QIcon::setFallbackThemeName(u"breeze"_s);
 
     QApplication qApplication(argc, argv);
+    if (qEnvironmentVariableIsSet("FLOATFRAME_STARTUP_TRACE")) {
+        fprintf(stderr, "FF-T qapplication %lld\n", static_cast<long long>(QDateTime::currentMSecsSinceEpoch()));
+    }
     QApplication::setWindowIcon(QIcon::fromTheme(u"io.github.python2121.FloatFrame"_s));
 
     bool handledByQPT = INITIAL_STYLE != QQuickStyle::name();
@@ -97,7 +102,9 @@ int main(int argc, char *argv[])
     KLocalization::setupLocalizedContext(&engine);
 
     engine.addImageProvider(u"thumbnail"_s, new ThumbnailImageProvider());
+    application->trace(u"engine-load-begin"_s);
     engine.loadFromModule("org.kde.haruna", "Main");
+    application->trace(u"engine-load-end"_s);
 
     application->setQmlEngine(&engine);
 
