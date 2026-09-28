@@ -63,6 +63,12 @@ set_package_properties(Qt6Core5Compat PROPERTIES TYPE REQUIRED)
 
 find_package(Qt6Gui ${QT_MIN_VERSION})
 set_package_properties(Qt6Gui PROPERTIES TYPE REQUIRED)
+# qpa/qplatformwindow_p.h: the Wayland window margins behind the chromeless resize band
+find_package(Qt6GuiPrivate ${QT_MIN_VERSION})
+set_package_properties(Qt6GuiPrivate PROPERTIES TYPE REQUIRED)
+# wl_surface opaque region for the chromeless window (see SystemUtils::setWindowOpaqueInset)
+find_package(Wayland COMPONENTS Client)
+set_package_properties(Wayland PROPERTIES TYPE REQUIRED)
 
 find_package(Qt6Qml ${QT_MIN_VERSION})
 set_package_properties(Qt6Qml PROPERTIES TYPE REQUIRED)

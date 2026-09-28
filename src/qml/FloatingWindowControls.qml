@@ -111,25 +111,6 @@ Item {
         x: 0
         width: root.width
 
-        // The window's resize zones (WindowResizeHandles: 8 px edges, 16 px
-        // corners) sit underneath this bar. Leave those pixels out of the bar's
-        // hit area so a press there resizes the window instead of moving it.
-        containmentMask: Item {
-            function contains(point: point) : bool {
-                const edge = 8
-                const corner = 16
-                if (point.x < 0 || point.x > bar.width || point.y < 0 || point.y > bar.height) {
-                    return false
-                }
-                if (point.y < edge) {
-                    return false
-                }
-                if (point.y < corner && (point.x < corner || point.x > bar.width - corner)) {
-                    return false
-                }
-                return true
-            }
-        }
         padding: Kirigami.Units.smallSpacing
         position: ToolBar.Header
         hoverEnabled: true

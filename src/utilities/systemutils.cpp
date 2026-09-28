@@ -12,6 +12,11 @@
 #include <QQuickItem>
 #include <QWindow>
 
+#include <QtGui/qguiapplication_platform.h>
+#include <qpa/qplatformwindow_p.h>
+
+#include <wayland-client-protocol.h>
+
 #include <KIO/ApplicationLauncherJob>
 #include <KService>
 #include <KWindowSystem>
@@ -127,6 +132,50 @@ bool SystemUtils::startSystemMove(QObject *window, QObject *grabber)
         releaseMouseGrabLater(grabber);
     }
     return started;
+}
+
+bool SystemUtils::setWindowMargins(QObject *window, int margin)
+{
+    auto *qWindow = qobject_cast<QWindow *>(window);
+    if (qWindow == nullptr || margin < 0) {
+        return false;
+    }
+    auto *wayland = qWindow->nativeInterface<QNativeInterface::Private::QWaylandWindow>();
+    if (wayland == nullptr) {
+        return false;
+    }
+    wayland->setCustomMargins(QMargins(margin, margin, margin, margin));
+    return true;
+}
+
+bool SystemUtils::setWindowOpaqueInset(QObject *window, int inset)
+{
+    auto *qWindow = qobject_cast<QWindow *>(window);
+    if (qWindow == nullptr || inset < 0) {
+        return false;
+    }
+    auto *waylandWindow = qWindow->nativeInterface<QNativeInterface::Private::QWaylandWindow>();
+    auto *waylandApp = qGuiApp->nativeInterface<QNativeInterface::QWaylandApplication>();
+    if (waylandWindow == nullptr || waylandApp == nullptr) {
+        return false;
+    }
+    wl_surface *surface = waylandWindow->surface();
+    wl_compositor *compositor = waylandApp->compositor();
+    if (surface == nullptr || compositor == nullptr) {
+        return false;
+    }
+    // No client-side decoration, so the QWindow is the whole surface and its
+    // logical size is what wl_region takes.
+    const QRect opaque = QRect(QPoint(0, 0), qWindow->size()).marginsRemoved(QMargins(inset, inset, inset, inset));
+    wl_region *region = wl_compositor_create_region(compositor);
+    if (opaque.isValid()) {
+        wl_region_add(region, opaque.x(), opaque.y(), opaque.width(), opaque.height());
+    }
+    wl_surface_set_opaque_region(surface, region);
+    wl_region_destroy(region);
+    // takes effect with the next commit, so make sure one comes
+    qWindow->requestUpdate();
+    return true;
 }
 
 bool SystemUtils::startSystemResize(QObject *window, int edges, QObject *grabber)

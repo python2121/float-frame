@@ -34,6 +34,24 @@ public:
     // (resetting its pressed state) once the request has been sent.
     Q_INVOKABLE static bool startSystemMove(QObject *window, QObject *grabber);
     Q_INVOKABLE static bool startSystemResize(QObject *window, int edges, QObject *grabber);
+    // Wayland: reserve `margin` px of the window's surface on every side as a
+    // band the compositor treats as *outside* the window (it is excluded from
+    // the xdg window geometry, the way client-side shadows are). Pointer
+    // events in the band still reach the window, so a frameless window can
+    // offer resize grab zones beyond its visible edge, like a decorated one.
+    // Qt grows/shrinks the surface by the change so the area inside the band
+    // keeps its size. Returns false — and changes nothing — off Wayland or
+    // before the window has a native surface.
+    Q_INVOKABLE static bool setWindowMargins(QObject *window, int margin);
+    // Wayland: tell the compositor the window is opaque except for an `inset`
+    // px band around it (the resize band above), or opaque everywhere with 0.
+    // Asking for an alpha buffer makes Qt stop reporting any opaque region,
+    // which costs a blend of the whole surface every frame and rules out
+    // direct scanout of fullscreen video; this puts the region back. It is in
+    // surface coordinates, so call it again after every resize and whenever
+    // the band changes. Returns false (no change) off Wayland or before the
+    // window has a surface.
+    Q_INVOKABLE static bool setWindowOpaqueInset(QObject *window, int inset);
 };
 
 #endif // SYSTEMUTILS_H

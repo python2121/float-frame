@@ -33,7 +33,7 @@ Item {
     property bool isSmallSize: width < 600
     property int buttonSize: isSmallSize ? Kirigami.Units.iconSizes.small : Kirigami.Units.iconSizes.smallMedium
 
-    implicitWidth: Window.window.contentItem.width
+    implicitWidth: root.parent ? root.parent.width : 0
     implicitHeight: root.isFloating
                     ? footer.height + Kirigami.Units.largeSpacing * (root.isSmallSize ? 1 : 2)
                     : footer.height
@@ -43,7 +43,7 @@ Item {
 
         x: (root.width - width) / 2
         width: root.isFloating
-               ? Math.min(Window.window.contentItem.width - Kirigami.Units.largeSpacing * (root.isSmallSize ? 2 : 4), 900)
+               ? Math.min(root.width - Kirigami.Units.largeSpacing * (root.isSmallSize ? 2 : 4), 900)
                : root.width
 
         state: root.footerState

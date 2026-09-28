@@ -33,6 +33,37 @@ ApplicationWindow {
     readonly property bool chromeless: GeneralSettings.chromeless || HarunaApp.chromelessOverride
     onChromelessChanged: fitWindowTimer.restart()
 
+    // Chromeless: a transparent band this wide around the visible window,
+    // excluded from what the compositor treats as the window, so the resize
+    // grab zones can start outside the frame like a decorated window's do.
+    // Only while windowed — maximized and fullscreen the surface has to match
+    // the screen exactly. `frameBand` is what actually got applied (the band
+    // is Wayland-only); the visible content is inset by that much.
+    readonly property int frameMargin: chromeless
+                                       && visibility !== Window.Maximized
+                                       && visibility !== Window.FullScreen ? 10 : 0
+    property int frameBand: 0
+    onFrameMarginChanged: applyFrameMargin()
+
+    function applyFrameMargin() : void {
+        if (SystemUtils.setWindowMargins(window, frameMargin)) {
+            frameBand = frameMargin
+        }
+        applyOpaqueArea()
+    }
+
+    // Everything inside the band is opaque (the frame paints black behind the
+    // video; framed mode has the theme background). Tell the compositor so:
+    // the alpha buffer the band needs otherwise makes it blend the whole
+    // surface and skip direct scanout of fullscreen video. Surface
+    // coordinates, so it follows every resize.
+    function applyOpaqueArea() : void {
+        SystemUtils.setWindowOpaqueInset(window, frameBand)
+    }
+    onFrameBandChanged: applyOpaqueArea()
+    onWidthChanged: applyOpaqueArea()
+    onHeightChanged: applyOpaqueArea()
+
     property int previousVisibility: Window.Windowed
     property var acceptedSubtitleTypes: ["application/x-subrip", "text/x-ssa", "text/x-microdvd"]
 
@@ -55,9 +86,13 @@ ApplicationWindow {
     minimumWidth: 400
     minimumHeight: 200
     flags: chromeless ? (Qt.Window | Qt.FramelessWindowHint) : Qt.Window
-    color: chromeless ? "black" : Kirigami.Theme.backgroundColor
+    // Transparent so the resize band is see-through; the frame item paints
+    // its own black behind the video.
+    color: chromeless ? "transparent" : Kirigami.Theme.backgroundColor
 
     onVisibilityChanged: function(visibility) {
+        // the native window exists by now, and the band depends on the state
+        applyFrameMargin()
         if (PlaybackSettings.pauseWhileMinimized) {
             if (visibility === Window.Minimized) {
                 if (mpv.pause) {
@@ -205,12 +240,16 @@ ApplicationWindow {
         }
     }
 
+    // Activated from Component.onCompleted, after the frame band is applied:
+    // the saved size includes the band, so restoring it first would grow the
+    // window by the band on every launch.
     Loader {
+        id: windowStateSaverLoader
+
         active: false
         sourceComponent: KConfig.WindowStateSaver {
             configGroupName: "MainWindow"
         }
-        Component.onCompleted: active = GeneralSettings.rememberWindowGeometry
     }
 
     MprisItem {
@@ -224,194 +263,238 @@ ApplicationWindow {
         }
     }
 
-    MpvVideo {
-        id: mpv
+    // The visible window: the surface minus the transparent resize band
+    // (frameBand) around it. Everything the user sees lives in here; the
+    // resize handles after it cover the whole surface, band included.
+    Item {
+        id: frame
 
-        playlistsManager: playlist.manager
+        anchors.fill: parent
+        anchors.margins: window.frameBand
 
-        width: window.contentItem.width
-        height: window.isFullScreen()
-                ? window.contentItem.height
-                : window.contentItem.height - (footer.isFloating ? 0 : footer.height)
-        anchors.left: playlist.edge === Qt.LeftEdge
-                      ? PlaylistSettings.overlayVideo ? window.contentItem.left : playlist.right
-                      : transcript.right
-        anchors.right: playlist.edge === Qt.RightEdge
-                       ? PlaylistSettings.overlayVideo ? window.contentItem.right : playlist.left
-                       : transcript.left
-        anchors.top: window.contentItem.top
+        // The window is transparent in chromeless mode (for the band); keep
+        // the frame itself opaque black behind the video.
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            visible: window.chromeless
+        }
 
-        onFilesDropped: function(urls: list<url>, mode: int) {
-            playlist.manager.defaultPlaylist.addFilesAndFolders(urls, mode)
-            if (mode === PlaylistModel.Behavior.Clear) {
+        MpvVideo {
+            id: mpv
+
+            playlistsManager: playlist.manager
+
+            width: frame.width
+            height: window.isFullScreen()
+                    ? frame.height
+                    : frame.height - (footer.isFloating ? 0 : footer.height)
+            anchors.left: playlist.edge === Qt.LeftEdge
+                          ? PlaylistSettings.overlayVideo ? frame.left : playlist.right
+                          : transcript.right
+            anchors.right: playlist.edge === Qt.RightEdge
+                           ? PlaylistSettings.overlayVideo ? frame.right : playlist.left
+                           : transcript.left
+            anchors.top: frame.top
+
+            onFilesDropped: function(urls: list<url>, mode: int) {
+                playlist.manager.defaultPlaylist.addFilesAndFolders(urls, mode)
+                if (mode === PlaylistModel.Behavior.Clear) {
+                    Models.recentFilesModel.addRecentFile(playlist.manager.activeItemPath(), RecentFilesModel.OpenedFrom.Playlist)
+                }
+            }
+
+            onVideoReconfig: {
+                HarunaApp.trace("video-reconfig")
+                window.resizeWindow()
+                fitWindowTimer.restart()
+            }
+
+            onCropChanged: {
+                if (mpv.hasCrop()) {
+                    osd.message(KI18n.i18nc("@info:tooltip", "Cropped to %1 × %2", mpv.cropRect.width, mpv.cropRect.height))
+                }
+                fitWindowTimer.restart()
+            }
+
+            // osd-dimensions settles a moment after a reconfig
+            Timer {
+                id: fitWindowTimer
+                interval: 150
+                onTriggered: window.fitWindowToPicture(false)
+            }
+
+            onEofPlayNext: {
                 Models.recentFilesModel.addRecentFile(playlist.manager.activeItemPath(), RecentFilesModel.OpenedFrom.Playlist)
             }
-        }
 
-        onVideoReconfig: {
-            HarunaApp.trace("video-reconfig")
-            window.resizeWindow()
-            fitWindowTimer.restart()
-        }
-
-        onCropChanged: {
-            if (mpv.hasCrop()) {
-                osd.message(KI18n.i18nc("@info:tooltip", "Cropped to %1 × %2", mpv.cropRect.width, mpv.cropRect.height))
+            onOsdMessage: function(text) {
+                osd.message(text);
             }
-            fitWindowTimer.restart()
-        }
 
-        // osd-dimensions settles a moment after a reconfig
-        Timer {
-            id: fitWindowTimer
-            interval: 150
-            onTriggered: window.fitWindowToPicture(false)
-        }
+            onIsReadyChanged: {
+                HarunaApp.trace("mpv-ready")
+                osd.active = true
+                window.initPlaylist()
+                if (window.chromeless && !GeneralSettings.chromelessHintShown) {
+                    osd.message(window.chromelessHintText())
+                    GeneralSettings.chromelessHintShown = true
+                    GeneralSettings.save()
+                }
+            }
 
-        onEofPlayNext: {
-            Models.recentFilesModel.addRecentFile(playlist.manager.activeItemPath(), RecentFilesModel.OpenedFrom.Playlist)
-        }
+            Osd {
+                id: osd
 
-        onOsdMessage: function(text) {
-            osd.message(text);
-        }
+                maxWidth: mpv.width
+            }
 
-        onIsReadyChanged: {
-            HarunaApp.trace("mpv-ready")
-            osd.active = true
-            window.initPlaylist()
-            if (window.chromeless && !GeneralSettings.chromelessHintShown) {
-                osd.message(window.chromelessHintText())
-                GeneralSettings.chromelessHintShown = true
-                GeneralSettings.save()
+            SelectActionPopup {
+                id: triggerActionPopup
+
+                onActionSelected: function(actionName) {
+                    HarunaApp.actions[actionName].trigger()
+                }
             }
         }
 
-        Osd {
-            id: osd
-
-            maxWidth: mpv.width
+        // extra space outside the playlist so that the playlist is not closed
+        // when the mouse leaves it by mistake (dragging items, resizing the playlist)
+        Item {
+            // when window width is very small, there is only 50 pixels not covered by the playlist
+            // in that case the extra space is reduced to 30 to allow the playlist to be closed with the mouse
+            width: playlist.width >= frame.width - 70 ? 30 : 50
+            height: playlist.height
+            anchors.right: PlaylistSettings.position === "right" ? playlist.left : undefined
+            anchors.left: PlaylistSettings.position === "left" ? playlist.right : undefined
+            visible: playlist.visible
+            HoverHandler {}
         }
 
-        SelectActionPopup {
-            id: triggerActionPopup
+        Transcript {
+            id: transcript
 
-            onActionSelected: function(actionName) {
-                HarunaApp.actions[actionName].trigger()
+            m_mpv: mpv
+            height: mpv.height
+            mainWindowWidth: frame.width
+            fsScale: window.isFullScreen() && PlaylistSettings.bigFontFullscreen ? 1.36 : 1
+
+            Connections {
+                target: actions
+                function onToggleTranscript() {
+                    if (transcript.state === "visible") {
+                        transcript.state = "hidden"
+                    } else {
+                        transcript.state = "visible"
+                    }
+                }
             }
         }
-    }
 
-    // Declared right after the video so the grab zones sit above it but below
-    // the playlist, transcript and footer, which keep their own edge pixels.
-    WindowResizeHandles {
-        targetWindow: window
-        anchors.fill: parent
-        visible: window.chromeless && window.visibility === Window.Windowed && !mpv.cropOverlay.active
-    }
+        // Float Frame: the playlist engine stays (folders, next file, MPRIS) but its
+        // slide-in panel is gone; QuickSettings takes the right edge.
+        Playlist {
+            id: playlist
 
-    // extra space outside the playlist so that the playlist is not closed
-    // when the mouse leaves it by mistake (dragging items, resizing the playlist)
-    Item {
-        // when window width is very small, there is only 50 pixels not covered by the playlist
-        // in that case the extra space is reduced to 30 to allow the playlist to be closed with the mouse
-        width: playlist.width >= Window.window.width - 70 ? 30 : 50
-        height: playlist.height
-        anchors.right: PlaylistSettings.position === "right" ? playlist.left : undefined
-        anchors.left: PlaylistSettings.position === "left" ? playlist.right : undefined
-        visible: playlist.visible
-        HoverHandler {}
-    }
+            property bool isReady: false
 
-    Transcript {
-        id: transcript
+            m_mpv: mpv
+            state: "hidden"
+            visible: false
+            height: mpv.height
+            mainWindowWidth: frame.width
+            fsScale: window.isFullScreen() && PlaylistSettings.bigFontFullscreen ? 1.36 : 1
 
-        m_mpv: mpv
-        height: mpv.height
-        mainWindowWidth: window.width
-        fsScale: window.isFullScreen() && PlaylistSettings.bigFontFullscreen ? 1.36 : 1
+            Component.onCompleted: {
+                isReady = true
+                window.initPlaylist()
+            }
 
-        Connections {
-            target: actions
-            function onToggleTranscript() {
-                if (transcript.state === "visible") {
-                    transcript.state = "hidden"
-                } else {
-                    transcript.state = "visible"
+        }
+
+        Footer {
+            id: footer
+
+            anchors.bottom: frame.bottom
+
+            m_mpv: mpv
+            playlistsManager: playlist.manager
+            m_menuBarLoader: menuBarLoader
+            m_header: header
+            m_settingsLoader: settingsLoader
+        }
+
+        // chromeless: window title and minimize/maximize/close appear on mouse movement
+        FloatingWindowControls {
+            m_mpv: mpv
+            width: frame.width
+            anchors.top: frame.top
+        }
+
+        // Built off the startup path: the pane (three tabs, ~40 controls) is
+        // created asynchronously once the window is up; opening it before that
+        // finishes forces completion on the spot.
+        Loader {
+            id: quickSettingsLoader
+
+            active: true
+            asynchronous: true
+            sourceComponent: QuickSettings {
+                m_mpv: mpv
+                height: mpv.height
+                mainWindowWidth: frame.width
+                fsScale: 1
+            }
+            onLoaded: HarunaApp.trace("quicksettings-loaded")
+
+            function pane() : QuickSettings {
+                if (status !== Loader.Ready) {
+                    asynchronous = false   // completes the pending load synchronously
+                }
+                return item as QuickSettings
+            }
+
+            Connections {
+                target: actions
+                function onToggleQuickSettings() {
+                    quickSettingsLoader.pane()?.toggle()
+                }
+            }
+        }
+
+        RowLayout {
+            width: frame.width * 0.8 > Kirigami.Units.gridUnit * 50
+                   ? Kirigami.Units.gridUnit * 50
+                   : frame.width * 0.8
+            anchors.centerIn: parent
+
+            Kirigami.InlineMessage {
+                id: messageBox
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                type: Kirigami.MessageType.Error
+                showCloseButton: true
+
+                Connections {
+                    target: MiscUtils
+                    function onError(message) {
+                        messageBox.visible = true
+                        messageBox.text = message
+                    }
                 }
             }
         }
     }
 
-    // Float Frame: the playlist engine stays (folders, next file, MPRIS) but its
-    // slide-in panel is gone; QuickSettings takes the right edge.
-    Playlist {
-        id: playlist
-
-        property bool isReady: false
-
-        m_mpv: mpv
-        state: "hidden"
-        visible: false
-        height: mpv.height
-        mainWindowWidth: window.width
-        fsScale: window.isFullScreen() && PlaylistSettings.bigFontFullscreen ? 1.36 : 1
-
-        Component.onCompleted: {
-            isReady = true
-            window.initPlaylist()
-        }
-
-    }
-
-    Footer {
-        id: footer
-
-        anchors.bottom: window.contentItem.bottom
-
-        m_mpv: mpv
-        playlistsManager: playlist.manager
-        m_menuBarLoader: menuBarLoader
-        m_header: header
-        m_settingsLoader: settingsLoader
-    }
-
-    // chromeless: window title and minimize/maximize/close appear on mouse movement
-    FloatingWindowControls {
-        m_mpv: mpv
-        width: window.contentItem.width
-        anchors.top: window.contentItem.top
-    }
-
-    // Built off the startup path: the pane (three tabs, ~40 controls) is
-    // created asynchronously once the window is up; opening it before that
-    // finishes forces completion on the spot.
-    Loader {
-        id: quickSettingsLoader
-
-        active: true
-        asynchronous: true
-        sourceComponent: QuickSettings {
-            m_mpv: mpv
-            height: mpv.height
-            mainWindowWidth: window.width
-            fsScale: 1
-        }
-        onLoaded: HarunaApp.trace("quicksettings-loaded")
-
-        function pane() : QuickSettings {
-            if (status !== Loader.Ready) {
-                asynchronous = false   // completes the pending load synchronously
-            }
-            return item as QuickSettings
-        }
-
-        Connections {
-            target: actions
-            function onToggleQuickSettings() {
-                quickSettingsLoader.pane()?.toggle()
-            }
-        }
+    // Stacked above the frame so the zones win their edge pixels from the
+    // panes and floating bars: the band outside the window plus a few pixels
+    // inside it.
+    WindowResizeHandles {
+        targetWindow: window
+        anchors.fill: parent
+        outerSize: window.frameBand
+        visible: window.chromeless && window.visibility === Window.Windowed && !mpv.cropOverlay.active
     }
 
     Actions {
@@ -428,30 +511,6 @@ ApplicationWindow {
 
         onOpenFileDialog: fileDialog.open()
         onOpenSubtitleDialog: subtitlesFileDialog.open()
-    }
-
-    RowLayout {
-        width: window.width * 0.8 > Kirigami.Units.gridUnit * 50
-               ? Kirigami.Units.gridUnit * 50
-               : window.width * 0.8
-        anchors.centerIn: parent
-
-        Kirigami.InlineMessage {
-            id: messageBox
-
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            type: Kirigami.MessageType.Error
-            showCloseButton: true
-
-            Connections {
-                target: MiscUtils
-                function onError(message) {
-                    messageBox.visible = true
-                    messageBox.text = message
-                }
-            }
-        }
     }
 
     MpvContextMenu {
@@ -562,6 +621,8 @@ ApplicationWindow {
 
     Component.onCompleted: {
         HarunaApp.trace("main-completed")
+        applyFrameMargin()
+        windowStateSaverLoader.active = GeneralSettings.rememberWindowGeometry
         HarunaApp.setupEventFilter(window)
         HarunaApp.activateColorScheme(GeneralSettings.colorScheme)
 
@@ -611,7 +672,8 @@ ApplicationWindow {
         const chromeHeight = (header.visible ? header.height : 0)
                            + (menuBar.visible ? menuBar.height : 0)
                            + (footer.isFloating ? 0 : footer.height)
-        const sideWidth = window.width - mpv.width   // panels beside the video
+                           + 2 * frameBand
+        const sideWidth = window.width - mpv.width   // panels beside the video, and the band
         let videoWidth = mpv.width
         let videoHeight = Math.round(videoWidth / aspect)
         const maxHeight = Screen.desktopAvailableHeight - chromeHeight

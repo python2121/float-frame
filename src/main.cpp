@@ -49,6 +49,9 @@ int main(int argc, char *argv[])
 
     // required by mpv
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
+    // The chromeless window is transparent around its visible frame (the
+    // resize band, see Main.qml frameMargin); that needs an alpha channel.
+    QQuickWindow::setDefaultAlphaBuffer(true);
 
     QIcon::setFallbackThemeName(u"breeze"_s);
 
