@@ -209,7 +209,7 @@ MpvItem {
                 // press becomes a window grab instead of a click (play/pause)
                 if (distance >= Application.styleHints.startDragDistance * 1.3) {
                     leftActionPending = false
-                    SystemUtils.startSystemMove(root.window, mouseArea)
+                    root.window.startWindowMove(mouseArea)
                     return
                 }
             }
@@ -233,6 +233,7 @@ MpvItem {
 
         onPressed: function(mouse) {
             focus = true
+            root.window.windowGrabActive = false
             if (mouse.button === Qt.LeftButton && canDragWindow()) {
                 leftActionPending = true
                 pressPosition = Qt.point(mouse.x, mouse.y)

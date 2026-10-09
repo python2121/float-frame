@@ -60,6 +60,36 @@ ApplicationWindow {
     function applyOpaqueArea() : void {
         SystemUtils.setWindowOpaqueInset(window, frameBand)
     }
+    // Chromeless: set while the compositor runs an interactive move or resize.
+    // The pointer has left the window for the whole drag, so the overlays
+    // can't track it; they stay up until this clears and only then start
+    // their hide countdown. Cleared when the pointer comes back after the
+    // button is released (or on the next press, should that be missed).
+    property bool windowGrabActive: false
+
+    function startWindowMove(grabber) : bool {
+        const started = SystemUtils.startSystemMove(window, grabber)
+        if (started) {
+            windowGrabActive = true
+        }
+        return started
+    }
+
+    function startWindowResize(edges, grabber) : bool {
+        const started = SystemUtils.startSystemResize(window, edges, grabber)
+        if (started) {
+            windowGrabActive = true
+        }
+        return started
+    }
+
+    Connections {
+        target: HarunaApp
+        function onQmlApplicationMouseEnter() {
+            window.windowGrabActive = false
+        }
+    }
+
     onFrameBandChanged: applyOpaqueArea()
     onWidthChanged: applyOpaqueArea()
     onHeightChanged: applyOpaqueArea()

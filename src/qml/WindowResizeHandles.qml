@@ -8,7 +8,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 
-import org.kde.haruna.utilities
+import org.kde.haruna
 
 // Invisible grab zones along the edges and corners of a frameless window.
 // Pressing one asks the compositor to start an interactive resize, so the
@@ -22,7 +22,7 @@ import org.kde.haruna.utilities
 Item {
     id: root
 
-    required property Window targetWindow
+    required property Main targetWindow
     property int outerSize: 0
     property int edgeSize: outerSize > 0 ? 4 : 8
     property int cornerSize: outerSize > 0 ? 10 : 16
@@ -37,7 +37,7 @@ Item {
         required property int edges
 
         acceptedButtons: Qt.LeftButton
-        onPressed: SystemUtils.startSystemResize(root.targetWindow, handle.edges, handle)
+        onPressed: root.targetWindow.startWindowResize(handle.edges, handle)
     }
 
     // edges

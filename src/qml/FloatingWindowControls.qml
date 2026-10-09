@@ -31,6 +31,20 @@ Item {
     property string barState: "hidden"
 
     readonly property Window targetWindow: Window.window
+    // the window is being moved or resized: stay up, count down once it ends
+    readonly property bool grabActive: (targetWindow as Main)?.windowGrabActive === true
+    onGrabActiveChanged: {
+        if (!shouldShow) {
+            return
+        }
+        hideTimer.stop()
+        leaveHideTimer.stop()
+        if (grabActive) {
+            barState = "visible"
+        } else {
+            hideTimer.restart()
+        }
+    }
     readonly property bool shouldShow: (targetWindow as Main)?.chromeless === true
                                        && targetWindow.visibility !== Window.FullScreen
 
@@ -43,10 +57,13 @@ Item {
     }
 
     // Same rules as the floating footer (Footer.floatingState), top edge
-    // instead of bottom: every mouse movement shows it and it hides 1 s later
+    // instead of bottom: every mouse movement shows it and it hides 1.3 s later
     // unless the pointer is near it; in "edge" trigger mode it only shows while
     // the pointer is near the top edge.
     function show() : void {
+        if (root.grabActive) {
+            return
+        }
         if (GeneralSettings.floatingFooterTrigger === "EveryMouseMovement") {
             hideTimer.stop()
             root.barState = "visible"
@@ -77,6 +94,9 @@ Item {
     Connections {
         target: HarunaApp
         function onQmlApplicationMouseLeave() {
+            if (root.grabActive) {
+                return
+            }
             hideTimer.stop()
             leaveHideTimer.restart()
         }
@@ -85,16 +105,16 @@ Item {
         }
     }
 
-    // pointer left the window: hide 2 s later regardless of the hover state
+    // pointer left the window: hide 2.6 s later regardless of the hover state
     Timer {
         id: leaveHideTimer
-        interval: 2000
+        interval: 2600
         onTriggered: root.barState = "hidden"
     }
 
     Timer {
         id: hideTimer
-        interval: 1000
+        interval: 1300
         onTriggered: {
             // like the footer: stay while hovered, the next mouse move re-arms
             if (bar.hovered) {
@@ -124,7 +144,7 @@ Item {
             target: null
             onActiveChanged: {
                 if (active) {
-                    SystemUtils.startSystemMove(root.targetWindow, null)
+                    (root.targetWindow as Main).startWindowMove(null)
                 }
             }
         }

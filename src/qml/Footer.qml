@@ -58,7 +58,7 @@ Item {
         Connections {
             target: HarunaApp
             function onQmlApplicationMouseLeave() {
-                if (root.isFloating) {
+                if (root.isFloating && !footer.grabActive) {
                     hideFooterTimer.stop()
                     leaveHideTimer.restart()
                 }
@@ -68,17 +68,32 @@ Item {
             }
         }
 
-        // Pointer left the window: hide 2 s later no matter what `hovered` says
+        // Pointer left the window: hide 2.6 s later no matter what `hovered` says
         // (it can stay set after a Wayland pointer leave), unless a menu is open.
         Timer {
             id: leaveHideTimer
-            interval: 2000
+            interval: 2600
             onTriggered: {
                 if (hamburgerMenu.isOpen || progressBar.chaptersPopupIsOpen) {
                     leaveHideTimer.restart()
                     return
                 }
                 root.footerState = "hidden"
+            }
+        }
+
+        // the window is being moved or resized: stay up, count down once it ends
+        readonly property bool grabActive: (root.Window.window as Main)?.windowGrabActive === true
+        onGrabActiveChanged: {
+            if (!root.isFloating) {
+                return
+            }
+            hideFooterTimer.stop()
+            leaveHideTimer.stop()
+            if (grabActive) {
+                root.footerState = "visible"
+            } else {
+                hideFooterTimer.restart()
             }
         }
 
@@ -103,7 +118,7 @@ Item {
 
             running: false
             repeat: false
-            interval: 1000
+            interval: 1300
             onTriggered: {
                 if (footer.hovered || hamburgerMenu.isOpen || progressBar.chaptersPopupIsOpen) {
                     return
@@ -316,6 +331,9 @@ Item {
         }
 
         function floatingState() {
+            if (footer.grabActive) {
+                return
+            }
             if (GeneralSettings.floatingFooterTrigger === "EveryMouseMovement") {
                 hideFooterTimer.stop()
                 root.footerState = "visible"
