@@ -50,6 +50,8 @@ ResizeablePage {
     readonly property var eqBands: [31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
     property var eqGains: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     property string eqPreset: "Flat"
+    // dynamic range compression, 0 = off .. 10 = strongest
+    property int drcLevel: 0
 
     // value: what mpv reports back (a double); send: what we set
     readonly property var aspectPresets: [
@@ -234,6 +236,26 @@ ResizeablePage {
         }
         const entries = root.eqBands.map((f, i) => `entry(${f},${root.eqGains[i]})`).join(";")
         root.m_mpv.command(["af", "add", `@ffeq:lavfi=[firequalizer=gain_entry='${entries}']`])
+    }
+
+    // Quiet parts up, loud parts down: a compressor whose threshold and ratio
+    // grow with the level, make-up gain for about half of what it takes off,
+    // and a limiter after it to catch peaks the attack lets through.
+    function applyDrc() : void {
+        const current = root.m_mpv.getProperty("af")
+        if (Array.isArray(current) && current.some(f => f.label === "drc")) {
+            root.m_mpv.command(["af", "remove", "@drc"])
+        }
+        if (root.drcLevel === 0) {
+            return
+        }
+        const thresholdDb = -9 - 2.7 * root.drcLevel
+        const ratio = 1.5 + 0.85 * root.drcLevel
+        const makeupDb = -thresholdDb * (1 - 1 / ratio) * 0.5
+        const threshold = Math.pow(10, thresholdDb / 20).toFixed(4)
+        const makeup = Math.pow(10, makeupDb / 20).toFixed(2)
+        root.m_mpv.command(["af", "add",
+            `@drc:lavfi=[acompressor=threshold=${threshold}:ratio=${ratio.toFixed(2)}:attack=5:release=150:knee=4:makeup=${makeup},alimiter=limit=0.97:level=0]`])
     }
 
     function setEqGain(index: int, value: real) : void {
@@ -634,6 +656,47 @@ ResizeablePage {
                                         Layout.alignment: Qt.AlignHCenter
                                     }
                                 }
+                            }
+                        }
+
+                        SectionHeading { text: KI18n.i18nc("@title", "Dynamic Range Compression") }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Kirigami.Units.smallSpacing
+                            Slider {
+                                id: drcSlider
+                                from: 0; to: 10; stepSize: 1
+                                value: root.drcLevel
+                                wheelEnabled: false
+                                Layout.fillWidth: true
+                                // rebuilding the filter stutters the audio, so a
+                                // drag applies on release (keys apply right away)
+                                function commit() : void {
+                                    if (root.drcLevel !== Math.round(value)) {
+                                        root.drcLevel = Math.round(value)
+                                        root.applyDrc()
+                                    }
+                                }
+                                onMoved: if (!pressed) commit()
+                                onPressedChanged: if (!pressed) commit()
+                            }
+                            Label {
+                                text: Math.round(drcSlider.value) === 0
+                                      ? KI18n.i18nc("@label dynamic range compression", "Off")
+                                      : Math.round(drcSlider.value)
+                                horizontalAlignment: Text.AlignRight
+                                Layout.preferredWidth: Kirigami.Units.gridUnit * 3
+                            }
+                            ToolButton {
+                                icon.name: "edit-reset"
+                                enabled: root.drcLevel !== 0
+                                opacity: enabled ? 1 : 0.3
+                                onClicked: {
+                                    root.drcLevel = 0
+                                    root.applyDrc()
+                                }
+                                ToolTip.text: KI18n.i18nc("@info:tooltip", "Off")
+                                ToolTip.visible: hovered
                             }
                         }
 
