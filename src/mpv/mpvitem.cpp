@@ -147,7 +147,7 @@ void MpvItem::initProperties()
 
     setProperty(MpvProperties::self()->HardwareDecoding, PlaybackSettings::hWDecoding());
     setProperty(MpvProperties::self()->Volume, AudioSettings::volume());
-    setProperty(MpvProperties::self()->VolumeMax, 150);
+    setProperty(MpvProperties::self()->VolumeMax, 200);
 
     const auto cmdParser = CommandLineOptions::instance().parser();
     QString ytdlFormat = PlaybackSettings::ytdlFormat();
